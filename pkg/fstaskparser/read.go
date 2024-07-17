@@ -75,6 +75,11 @@ func Read(dirPath string) (*Task, error) {
 		return nil, fmt.Errorf("error reading task name: %w", err)
 	}
 
+	t.cpuTimeSeconds, err = readCPUTimeLimitInSeconds(specVers, string(problemTomlContent))
+	if err != nil {
+		return nil, fmt.Errorf("error reading cpu time limit: %w", err)
+	}
+
 	t.tests, err = readTestsDir(dirPath)
 	if err != nil {
 		return nil, fmt.Errorf("error reading tests directory: %w", err)
@@ -107,6 +112,27 @@ func readTaskName(specVers string, tomlContent string) (string, error) {
 	}
 
 	return tomlStruct.TaskName, nil
+}
+
+func readCPUTimeLimitInSeconds(specVers string, tomlContent string) (float64, error) {
+	cmpres, err := largerOrEqualSemVersionThan(specVers, "2.2")
+	if err != nil {
+		return 0, fmt.Errorf("error comparing semversions: %w", err)
+	}
+	if !cmpres {
+		return 0, fmt.Errorf("unsupported specification version: %s", specVers)
+	}
+
+	tomlStruct := struct {
+		CPUTimeLimitInSeconds float64 `toml:"cpu_time_limit_in_seconds"`
+	}{}
+
+	err = toml.Unmarshal([]byte(tomlContent), &tomlStruct)
+	if err != nil {
+		return 0, fmt.Errorf("failed to unmarshal the cpu time limit: %w", err)
+	}
+
+	return tomlStruct.CPUTimeLimitInSeconds, nil
 }
 
 func readTestsDir(srcDirPath string) ([]Test, error) {
