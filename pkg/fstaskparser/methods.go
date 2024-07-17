@@ -95,10 +95,10 @@ func (t *Task) GetPublicTestGroupIDs() []int {
 
 }
 
-func (t *Task) GetTestFilenameFromID(testID int) *string {
+func (t *Task) GetTestFilenameFromID(testID int) string {
 	filename, ok := t.testIDToFilename[testID]
 	if !ok {
-		return nil
+		return ""
 	}
-	return &filename
+	return filename
 }

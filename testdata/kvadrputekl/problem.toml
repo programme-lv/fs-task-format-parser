@@ -17,11 +17,11 @@ visible_input_subtasks = [1]
   points = 3
   subtask = 1
   public = true
-  test_filenames = ['kp01a.in', 'kp01b.in', 'kp01c.in', 'kp01a.out', 'kp01b.out', 'kp01c.out']
+  test_filenames = ['kp01a', 'kp01b', 'kp01c']
 
 [[test_groups]]
   group_id = 2
   points = 8
   subtask = 2
-  public = true
-  test_filenames = ['kp02a.in', 'kp02b.in', 'kp02c.in', 'kp02a.out', 'kp02b.out', 'kp02c.out']
+  public = false 
+  test_filenames = ['kp02a', 'kp02b', 'kp02c']

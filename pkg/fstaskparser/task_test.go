@@ -24,11 +24,7 @@ func TestReadingWritingTests(t *testing.T) {
 	parsedTestNames := []string{}
 	for i := 0; i < 6; i++ {
 		filename := parsedTask.GetTestFilenameFromID(parsedTests[i].ID)
-		fnameNotPtr := ""
-		if filename != nil {
-			fnameNotPtr = *filename
-		}
-		parsedTestNames = append(parsedTestNames, fnameNotPtr)
+		parsedTestNames = append(parsedTestNames, filename)
 	}
 	expectedTestNames := []string{"kp01a", "kp01b", "kp01c", "kp02a", "kp02b", "kp02c"}
 	assert.Equal(t, expectedTestNames, parsedTestNames)
@@ -49,11 +45,7 @@ func TestReadingWritingTests(t *testing.T) {
 	expectedInputs := []string{}
 	for i := 0; i < 6; i++ {
 		filename := parsedTask.GetTestFilenameFromID(parsedTests[i].ID)
-		fnameNotPtr := ""
-		if filename != nil {
-			fnameNotPtr = *filename
-		}
-		inPath := filepath.Join(testPath, fmt.Sprintf("%s.in", fnameNotPtr))
+		inPath := filepath.Join(testPath, fmt.Sprintf("%s.in", filename))
 
 		in, err := os.ReadFile(inPath)
 		require.NoErrorf(t, err, "failed to read input file: %v", err)
@@ -69,11 +61,7 @@ func TestReadingWritingTests(t *testing.T) {
 	expectedAnsers := []string{}
 	for i := 0; i < 6; i++ {
 		filename := parsedTask.GetTestFilenameFromID(parsedTests[i].ID)
-		fnameNotPtr := ""
-		if filename != nil {
-			fnameNotPtr = *filename
-		}
-		ansPath := filepath.Join(testPath, fmt.Sprintf("%s.out", fnameNotPtr))
+		ansPath := filepath.Join(testPath, fmt.Sprintf("%s.out", filename))
 
 		ans, err := os.ReadFile(ansPath)
 		require.NoErrorf(t, err, "failed to read answer file: %v", err)
@@ -101,11 +89,7 @@ func TestReadingWritingTests(t *testing.T) {
 	tests := storedTask.GetTests()
 	for i := 0; i < 6; i++ {
 		filename := storedTask.GetTestFilenameFromID(tests[i].ID)
-		filenameNotPtr := ""
-		if filename != nil {
-			filenameNotPtr = *filename
-		}
-		storedTestNames = append(storedTestNames, filenameNotPtr)
+		storedTestNames = append(storedTestNames, filename)
 	}
 	assert.Equal(t, expectedTestNames, storedTestNames)
 
@@ -277,8 +261,29 @@ func TestReadingWritingTestGroups(t *testing.T) {
 	require.Equal(t, 2, len(parsedTestGroups))
 
 	expectedTestGroups := []int{1, 2}
-
 	assert.Equal(t, expectedTestGroups, parsedTestGroups)
+
+	firstParsedTestGroup := parsedTask.GetInfoOnTestGroup(1)
+	assert.Equal(t, 1, firstParsedTestGroup.GroupID)
+	assert.Equal(t, 3, firstParsedTestGroup.Points)
+	assert.Equal(t, 1, firstParsedTestGroup.Subtask)
+	assert.Equal(t, true, firstParsedTestGroup.Public)
+	assert.Equal(t, []int{1, 2, 3}, firstParsedTestGroup.TestIDs)
+
+	assert.Equal(t, "kp01a", parsedTask.GetTestFilenameFromID(1))
+	assert.Equal(t, "kp01b", parsedTask.GetTestFilenameFromID(2))
+	assert.Equal(t, "kp01c", parsedTask.GetTestFilenameFromID(3))
+
+	secondParsedTestGroup := parsedTask.GetInfoOnTestGroup(2)
+	assert.Equal(t, 2, secondParsedTestGroup.GroupID)
+	assert.Equal(t, 8, secondParsedTestGroup.Points)
+	assert.Equal(t, 2, secondParsedTestGroup.Subtask)
+	assert.Equal(t, false, secondParsedTestGroup.Public)
+	assert.Equal(t, []int{4, 5, 6}, secondParsedTestGroup.TestIDs)
+
+	assert.Equal(t, "kp02a", parsedTask.GetTestFilenameFromID(4))
+	assert.Equal(t, "kp02b", parsedTask.GetTestFilenameFromID(5))
+	assert.Equal(t, "kp02c", parsedTask.GetTestFilenameFromID(6))
 
 	tmpDirectory, err := os.MkdirTemp("", "fstaskparser-test-")
 	require.NoErrorf(t, err, "failed to create temporary directory: %v", err)
@@ -313,14 +318,14 @@ visible_input_subtasks = [1]
   points = 3
   subtask = 1
   public = true
-  test_filenames = ['kp01a.in', 'kp01b.in', 'kp01c.in', 'kp01a.out', 'kp01b.out', 'kp01c.out']
+  test_filenames = ['kp01a', 'kp01b', 'kp01c']
 
 [[test_groups]]
   group_id = 2
   points = 8
   subtask = 2
-  public = true
-  test_filenames = ['kp02a.in', 'kp02b.in', 'kp02c.in', 'kp02a.out', 'kp02b.out', 'kp02c.out']
+  public = false
+  test_filenames = ['kp02a', 'kp02b', 'kp02c']
 */
 
 /*

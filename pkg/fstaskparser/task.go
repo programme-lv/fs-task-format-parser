@@ -39,6 +39,9 @@ type Task struct {
 		2) read wchich groups are public
 		3) reach how many points each group has
 		4) read to which subtask each group belongs
+		5) read which test ids belong to each group
+		6) read which filenames belong to each group
+		7) append to groups test id(filename) for names
 	*/
 
 	testGroupIDs   []int
@@ -46,6 +49,7 @@ type Task struct {
 	tGroupPoints   map[int]int
 	tGroupToStMap  map[int]int
 	tGroupTestIDs  map[int][]int
+	tGroupFnames   map[int][]string
 }
 
 type TestGroup struct {

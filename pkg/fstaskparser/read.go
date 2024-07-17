@@ -25,15 +25,17 @@ func Read(dirPath string) (*Task, error) {
 		examples:             []Example{},
 		exampleFilenameToID:  map[string]int{},
 		visibleInputSubtasks: []int{},
-		testGroupIDs:         []int{},
-		isTGroupPublic:       map[int]bool{},
-		tGroupPoints:         map[int]int{},
-		tGroupToStMap:        map[int]int{},
 		testFnamesSorted:     []string{},
 		testFilenameToID:     map[string]int{},
 		testIDOverwrite:      map[string]int{},
 		testIDToFilename:     map[int]string{},
 		tests:                []Test{},
+		testGroupIDs:         []int{},
+		isTGroupPublic:       map[int]bool{},
+		tGroupPoints:         map[int]int{},
+		tGroupToStMap:        map[int]int{},
+		tGroupTestIDs:        map[int][]int{},
+		tGroupFnames:         map[int][]string{},
 	}
 
 	problemTomlPath := filepath.Join(dirPath, "problem.toml")
@@ -162,7 +164,288 @@ func Read(dirPath string) (*Task, error) {
 		return nil, fmt.Errorf("error reading examples directory: %w", err)
 	}
 
+	t.testGroupIDs, err = readTestGroupIDs(specVers, problemTomlContent)
+	if err != nil {
+		return nil, fmt.Errorf("error reading test group IDs: %w", err)
+	}
+
+	t.isTGroupPublic, err = readIsTGroupPublic(specVers, problemTomlContent, t.testGroupIDs)
+	if err != nil {
+		return nil, fmt.Errorf("error reading is test group public: %w", err)
+	}
+
+	t.tGroupPoints, err = readTGroupPoints(specVers, problemTomlContent, t.testGroupIDs)
+	if err != nil {
+		return nil, fmt.Errorf("error reading test group points: %w", err)
+	}
+
+	t.tGroupToStMap, err = readTGroupToStMap(specVers, problemTomlContent)
+	if err != nil {
+		return nil, fmt.Errorf("error reading test group to subtask map: %w", err)
+	}
+
+	t.tGroupTestIDs, err = readTGroupTestIDs(specVers, problemTomlContent, t.testGroupIDs)
+	if err != nil {
+		return nil, fmt.Errorf("error reading test group test IDs: %w", err)
+	}
+
+	t.tGroupFnames, err = readTGroupFnames(specVers, problemTomlContent, t.testGroupIDs)
+	if err != nil {
+		return nil, fmt.Errorf("error reading test group filenames: %w", err)
+	}
+
+	// add to ids
+	for k, v := range t.tGroupFnames {
+		for _, fname := range v {
+			t.tGroupTestIDs[k] = append(t.tGroupTestIDs[k], t.testFilenameToID[fname])
+		}
+	}
+
+	// validate that no two test groups have the same test ID
+	idsSpotted := make(map[int]bool)
+
+	for _, v := range t.testGroupIDs {
+		for _, id := range t.tGroupTestIDs[v] {
+			if _, ok := idsSpotted[id]; ok {
+				return nil, fmt.Errorf("duplicate test ID in test group: %d", id)
+			}
+			idsSpotted[id] = true
+		}
+	}
+
 	return &t, nil
+}
+
+func readTGroupFnames(specVers string, tomlContent []byte, tGroupIDs []int) (map[int][]string, error) {
+	res := make(map[int][]string, len(tGroupIDs))
+	for i := 0; i < len(tGroupIDs); i++ {
+		res[tGroupIDs[i]] = []string{}
+	}
+
+	semVerCmpRes, err := getCmpSemVersionsResult(specVers, "v2.2.0")
+	if err != nil {
+		return nil, fmt.Errorf("error comparing sem versions: %w", err)
+	}
+
+	if semVerCmpRes < 0 {
+		log.Println("warning: unsupported specification version (too old):", proglvFSTaskFormatSpecVersOfScript)
+		// return empty map
+		return res, nil
+	}
+
+	type testGroupInfo struct {
+		GroupID int      `toml:"group_id"`
+		Fnames  []string `toml:"test_filenames"`
+	}
+
+	tomlStruct := struct {
+		Groups []testGroupInfo `toml:"test_groups"`
+	}{}
+	err = toml.Unmarshal(tomlContent, &tomlStruct)
+	if err != nil {
+		return nil, fmt.Errorf("error unmarshaling test groups: %w", err)
+	}
+
+	for _, group := range tomlStruct.Groups {
+		if _, ok := res[group.GroupID]; ok {
+			res[group.GroupID] = group.Fnames
+		}
+	}
+
+	return res, nil
+}
+
+func readTGroupTestIDs(specVers string, tomlContent []byte, tGroupIDs []int) (map[int][]int, error) {
+	res := make(map[int][]int, len(tGroupIDs))
+	for i := 0; i < len(tGroupIDs); i++ {
+		res[tGroupIDs[i]] = []int{}
+	}
+
+	semVerCmpRes, err := getCmpSemVersionsResult(specVers, "v2.2.0")
+	if err != nil {
+		return nil, fmt.Errorf("error comparing sem versions: %w", err)
+	}
+
+	if semVerCmpRes < 0 {
+		log.Println("warning: unsupported specification version (too old):", proglvFSTaskFormatSpecVersOfScript)
+		// return empty map
+		return res, nil
+	}
+
+	type testGroupInfo struct {
+		GroupID int   `toml:"group_id"`
+		TestIDs []int `toml:"test_ids"`
+	}
+
+	tomlStruct := struct {
+		groups []testGroupInfo `toml:"test_groups"`
+	}{}
+
+	err = toml.Unmarshal(tomlContent, &tomlStruct)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal the test group IDs: %w", err)
+	}
+
+	for i := 0; i < len(tomlStruct.groups); i++ {
+		res[tomlStruct.groups[i].GroupID] = tomlStruct.groups[i].TestIDs
+	}
+
+	return res, nil
+}
+
+func readTGroupToStMap(specVers string, tomlContent []byte) (map[int]int, error) {
+	semVerCmpRes, err := getCmpSemVersionsResult(specVers, "v2.2.0")
+	if err != nil {
+		return nil, fmt.Errorf("error comparing sem versions: %w", err)
+	}
+
+	if semVerCmpRes < 0 {
+		log.Println("warning: unsupported specification version (too old):", proglvFSTaskFormatSpecVersOfScript)
+		// return empty map
+		return nil, nil
+	}
+
+	type testGroupInfo struct {
+		GroupID int `toml:"group_id"`
+		Subtask int `toml:"subtask"`
+	}
+
+	tomlStruct := struct {
+		Groups []testGroupInfo `toml:"test_groups"`
+	}{}
+
+	err = toml.Unmarshal(tomlContent, &tomlStruct)
+	if err != nil {
+		return nil, fmt.Errorf("error unmarshaling test groups: %w", err)
+	}
+
+	res := make(map[int]int, len(tomlStruct.Groups))
+
+	for _, group := range tomlStruct.Groups {
+		if _, ok := res[group.GroupID]; ok {
+			return nil, fmt.Errorf("duplicate group ID: %d", group.GroupID)
+		}
+		res[group.GroupID] = group.Subtask
+	}
+
+	return res, nil
+}
+
+func readTGroupPoints(specVers string, tomlContent []byte, tGroupIDs []int) (map[int]int, error) {
+	res := make(map[int]int, len(tGroupIDs))
+
+	for _, id := range tGroupIDs {
+		res[id] = 0
+	}
+
+	semVerCmpRes, err := getCmpSemVersionsResult(specVers, "v2.2.0")
+	if err != nil {
+		return nil, fmt.Errorf("error comparing sem versions: %w", err)
+	}
+
+	if semVerCmpRes < 0 {
+		log.Println("warning: unsupported specification version (too old):", proglvFSTaskFormatSpecVersOfScript)
+		// return empty map
+		return res, nil
+	}
+
+	type testGroupInfo struct {
+		GroupID int `toml:"group_id"`
+		Points  int `toml:"points"`
+	}
+
+	tomlStruct := struct {
+		Groups []testGroupInfo `toml:"test_groups"`
+	}{}
+
+	err = toml.Unmarshal(tomlContent, &tomlStruct)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal the test group IDs: %w", err)
+	}
+
+	for _, group := range tomlStruct.Groups {
+		res[group.GroupID] = group.Points
+	}
+
+	return res, nil
+}
+
+func readTestGroupIDs(specVers string, tomlContent []byte) ([]int, error) {
+	semVerCmpRes, err := getCmpSemVersionsResult(specVers, "v2.2.0")
+	if err != nil {
+		return nil, fmt.Errorf("error comparing sem versions: %w", err)
+	}
+
+	if semVerCmpRes < 0 {
+		log.Println("warning: unsupported specification version (too old) when reading test group IDs:", proglvFSTaskFormatSpecVersOfScript)
+		// return empty map
+		return nil, nil
+	}
+
+	type TestGroupID struct {
+		TestGroupID int `toml:"group_id"`
+	}
+
+	tomlStruct := struct {
+		Groups []TestGroupID `toml:"test_groups"`
+	}{}
+
+	err = toml.Unmarshal(tomlContent, &tomlStruct)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal the test group IDs: %w", err)
+	}
+
+	res := make([]int, len(tomlStruct.Groups))
+
+	for i, group := range tomlStruct.Groups {
+		res[i] = group.TestGroupID
+	}
+
+	return res, nil
+}
+
+func readIsTGroupPublic(specVers string, tomlContent []byte, tGroupIDs []int) (map[int]bool, error) {
+	res := make(map[int]bool, len(tGroupIDs))
+
+	for _, id := range tGroupIDs {
+		res[id] = true // debatable whether it should be true
+	}
+
+	semVerCmpRes, err := getCmpSemVersionsResult(specVers, "v2.2.0")
+	if err != nil {
+		return nil, fmt.Errorf("error comparing sem versions: %w", err)
+	}
+
+	if semVerCmpRes < 0 {
+		log.Println("warning: unsupported specification version (too old) when reading whether test groups are public:", proglvFSTaskFormatSpecVersOfScript)
+		// return empty map
+		return res, nil
+	}
+
+	type testGroupInfo struct {
+		GroupID int  `toml:"group_id"`
+		Public  bool `toml:"public"`
+	}
+
+	tomlStruct := struct {
+		Groups []testGroupInfo `toml:"test_groups"`
+	}{}
+
+	err = toml.Unmarshal(tomlContent, &tomlStruct)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal the test group IDs: %w", err)
+	}
+
+	for _, group := range tomlStruct.Groups {
+		_, ok := res[group.GroupID]
+		if !ok {
+			log.Println("warning: unknown test group ID:", group.GroupID)
+			continue
+		}
+		res[group.GroupID] = group.Public
+	}
+
+	return res, nil
 }
 
 func readTestIDOverwrite(specVers string, tomlContent []byte) (map[string]int, error) {
