@@ -8,12 +8,14 @@ import (
 )
 
 type ProblemTOML struct {
-	Specification string           `toml:"specification"`
-	TaskName      string           `toml:"task_name"`
-	Metadata      PTomlMetadata    `toml:"metadata"`
-	Constraints   PTomlConstraints `toml:"constraints"`
-	TestGroups    []PTomlTestGroup `toml:"test_groups"`
-	VisInpSTs     []int            `toml:"visible_input_subtasks"`
+	Specification      string           `toml:"specification"`
+	TaskName           string           `toml:"task_name"`
+	Metadata           PTomlMetadata    `toml:"metadata"`
+	Constraints        PTomlConstraints `toml:"constraints"`
+	TestGroups         []PTomlTestGroup `toml:"test_groups"`
+	VisInpSTs          []int            `toml:"visible_input_subtasks"`
+	TestIDOverwrite    map[string]int   `toml:"test_id_overwrite"`
+	ExampleIDOverwrite map[string]int   `toml:"example_id_overwrite"`
 }
 
 type PTomlMetadata struct {
@@ -33,10 +35,9 @@ type PTomlTestGroup struct {
 	GroupID    int      `toml:"group_id"`
 	Points     int      `toml:"points"`
 	Public     bool     `toml:"public"`
-	Subtask    *int     `toml:"subtask"` // nil if subtask id not found
-	TestIDs    []int    `toml:"test_ids"`
-	TestFnames []string `toml:"test_filenames"` // either one is fine
-	// TestFnames []string `toml:"test_filenames"`
+	Subtask    *int     `toml:"subtask,omitempty"` // nil if subtask id not found
+	TestIDs    []int    `toml:"test_ids,omitempty"`
+	TestFnames []string `toml:"test_filenames,omitempty"` // either one is fine
 }
 
 func (task *Task) encodeProblemTOML() ([]byte, error) {

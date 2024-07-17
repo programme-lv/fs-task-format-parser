@@ -8,7 +8,7 @@ import (
 
 const proglvFSTaskFormatSpecVersOfScript = "v2.3.0"
 
-func (t *Task) Store(dirPath string) error {
+func (task *Task) Store(dirPath string) error {
 	if _, err := os.Stat(dirPath); !os.IsNotExist(err) {
 		return fmt.Errorf("directory already exists: %s", dirPath)
 	}
@@ -18,7 +18,7 @@ func (t *Task) Store(dirPath string) error {
 		return fmt.Errorf("error creating directory: %w", err)
 	}
 
-	pToml, err := t.encodeProblemTOML()
+	pToml, err := task.encodeProblemTOML()
 	if err != nil {
 		return fmt.Errorf("error encoding problem.toml: %w", err)
 	}
@@ -35,7 +35,7 @@ func (t *Task) Store(dirPath string) error {
 		return fmt.Errorf("error creating tests directory: %w", err)
 	}
 
-	for i, t := range t.tests {
+	for i, t := range task.tests {
 		// create input file {name}.in
 		// create answer file {name}.out
 		// use name for {name} if it exists
@@ -44,9 +44,9 @@ func (t *Task) Store(dirPath string) error {
 		var inPath string = ""
 		var ansPath string = ""
 
-		if t.Name != nil {
-			inPath = filepath.Join(testsDirPath, *t.Name+".in")
-			ansPath = filepath.Join(testsDirPath, *t.Name+".out")
+		if fname, ok := task.testIDToFilename[t.ID]; ok {
+			inPath = filepath.Join(testsDirPath, fname+".in")
+			ansPath = filepath.Join(testsDirPath, fname+".out")
 		} else {
 			inName := fmt.Sprintf("%03d.in", i+1)
 			ansName := fmt.Sprintf("%03d.out", i+1)
@@ -71,7 +71,7 @@ func (t *Task) Store(dirPath string) error {
 		return fmt.Errorf("error creating examples directory: %w", err)
 	}
 
-	for i, e := range t.examples {
+	for i, e := range task.examples {
 		// treat tests and examples the same way
 
 		var inPath string = ""

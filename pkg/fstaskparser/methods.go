@@ -59,3 +59,25 @@ func (t *Task) GetDifficultyOneToFive() int {
 func (t *Task) SetDifficultyOneToFive(difficulty int) {
 	t.difficultyOneToFive = difficulty
 }
+
+func (t *Task) GetTestGroups() []TestGroup {
+	return t.testGroups
+}
+
+func (t *Task) GetPublicTestGroups() []TestGroup {
+	var publicTestGroups []TestGroup
+	for i, tg := range t.testGroups {
+		if t.isTGroupPublic[i] {
+			publicTestGroups = append(publicTestGroups, tg)
+		}
+	}
+	return publicTestGroups
+}
+
+func (t *Task) GetTestIDFilename(testID int) *string {
+	filename, ok := t.testIDToFilename[testID]
+	if !ok {
+		return nil
+	}
+	return &filename
+}

@@ -5,8 +5,8 @@
 - prefixed version by "v", migrated to semantic versioning 3 numbers
 - added concept of ids to tests and examples
 - when parsing default file ids are assigned by lex order of filenames
-- test default ids can then be overriden by `test_filename_to_id` table
-- example default ids can be overriden by `example_filename_to_id` table
+- test default ids can then be overriden by `test_id_overwrite` table
+- example default ids can be overriden by `example_id_overwrite` table
 - tests in test group can be specified by ids instead of filenames
 - ids dictate the order in which tests are run
 
@@ -15,8 +15,8 @@ is abstracted away. This change also decouples test ordering from
 filesystem ordering. It also makes toml files more readable.
 
 problem.toml spec
-- added `test_filename_to_id` (string to int map)
-- added `example_filename_to_id` (string to int map)
+- added `test_id_overwrite` (string to int map)
+- added `example_id_overwrite` (string to int map)
 - added `test_ids` to `test_groups` object
 
 ### version "2.2"

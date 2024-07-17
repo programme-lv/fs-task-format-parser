@@ -23,7 +23,12 @@ func TestReadingWritingTests(t *testing.T) {
 
 	parsedTestNames := []string{}
 	for i := 0; i < 6; i++ {
-		parsedTestNames = append(parsedTestNames, *parsedTests[i].Name)
+		filename := parsedTask.GetTestIDFilename(parsedTests[i].ID)
+		fnameNotPtr := ""
+		if filename != nil {
+			fnameNotPtr = *filename
+		}
+		parsedTestNames = append(parsedTestNames, fnameNotPtr)
 	}
 	expectedTestNames := []string{"kp01a", "kp01b", "kp01c", "kp02a", "kp02b", "kp02c"}
 	assert.Equal(t, expectedTestNames, parsedTestNames)
@@ -43,7 +48,12 @@ func TestReadingWritingTests(t *testing.T) {
 	testPath := filepath.Join(testTaskPath, "tests")
 	expectedInputs := []string{}
 	for i := 0; i < 6; i++ {
-		inPath := filepath.Join(testPath, fmt.Sprintf("%s.in", *parsedTests[i].Name))
+		filename := parsedTask.GetTestIDFilename(parsedTests[i].ID)
+		fnameNotPtr := ""
+		if filename != nil {
+			fnameNotPtr = *filename
+		}
+		inPath := filepath.Join(testPath, fmt.Sprintf("%s.in", fnameNotPtr))
 
 		in, err := os.ReadFile(inPath)
 		require.NoErrorf(t, err, "failed to read input file: %v", err)
@@ -58,7 +68,12 @@ func TestReadingWritingTests(t *testing.T) {
 	}
 	expectedAnsers := []string{}
 	for i := 0; i < 6; i++ {
-		ansPath := filepath.Join(testPath, fmt.Sprintf("%s.out", *parsedTests[i].Name))
+		filename := parsedTask.GetTestIDFilename(parsedTests[i].ID)
+		fnameNotPtr := ""
+		if filename != nil {
+			fnameNotPtr = *filename
+		}
+		ansPath := filepath.Join(testPath, fmt.Sprintf("%s.out", fnameNotPtr))
 
 		ans, err := os.ReadFile(ansPath)
 		require.NoErrorf(t, err, "failed to read answer file: %v", err)
@@ -83,8 +98,14 @@ func TestReadingWritingTests(t *testing.T) {
 	require.NoErrorf(t, err, "failed to read task: %v", err)
 
 	storedTestNames := []string{}
+	tests := storedTask.GetTests()
 	for i := 0; i < 6; i++ {
-		storedTestNames = append(storedTestNames, *storedTask.GetTests()[i].Name)
+		filename := storedTask.GetTestIDFilename(tests[i].ID)
+		filenameNotPtr := ""
+		if filename != nil {
+			filenameNotPtr = *filename
+		}
+		storedTestNames = append(storedTestNames, filenameNotPtr)
 	}
 	assert.Equal(t, expectedTestNames, storedTestNames)
 
@@ -246,6 +267,37 @@ func TestReadingWritingMetadata(t *testing.T) {
 	assert.Equal(t, []string{"Author1", "Author2"}, storedTask.GetTaskAuthors())
 	assert.Equal(t, "LIO", storedTask.GetOriginOlympiad())
 	assert.Equal(t, 3, storedTask.GetDifficultyOneToFive())
+}
+
+func TestReadingWritingTestGroups(t *testing.T) {
+	parsedTask, err := fstaskparser.Read(testTaskPath)
+	assert.NoErrorf(t, err, "failed to read task: %v", err)
+
+	parsedTestGroups := parsedTask.GetTestGroups()
+	require.Equal(t, 2, len(parsedTestGroups))
+
+	expectedTestGroups := []fstaskparser.TestGroup{
+		{
+			GroupID: 1,
+			TestIDs: []int{1, 2, 3},
+		},
+		{
+			GroupID: 2,
+			TestIDs: []int{4, 5, 6},
+		},
+	}
+
+	assert.Equal(t, expectedTestGroups, parsedTestGroups)
+
+	tmpDirectory, err := os.MkdirTemp("", "fstaskparser-test-")
+	require.NoErrorf(t, err, "failed to create temporary directory: %v", err)
+	defer os.RemoveAll(tmpDirectory)
+
+	outputDirectory := filepath.Join(tmpDirectory, "kvadrputekl")
+	t.Logf("Created directory for output: %s", outputDirectory)
+
+	err = parsedTask.Store(outputDirectory)
+	require.NoErrorf(t, err, "failed to store task: %v", err)
 }
 
 /*

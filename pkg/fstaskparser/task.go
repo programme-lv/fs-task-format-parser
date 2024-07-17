@@ -6,7 +6,6 @@ type Task struct {
 	// srcDirPath           string
 	problemTags          []string
 	problemAuthors       []string
-	tests                []Test // DONE
 	mdStatements         []MDStatement
 	taskName             string
 	originOlympiad       string
@@ -15,10 +14,25 @@ type Task struct {
 	cpuTimeSeconds       float64
 	testGroups           []TestGroup
 	examples             []Example
+	exampleFilenameToID  map[string]int
 	tGroupToStMap        map[int]int
 	isTGroupPublic       map[int]bool
 	tGroupPoints         map[int]int
 	visibleInputSubtasks []int
+
+	/*
+		1) read test filenames, sort them lexiographically
+		2) initialize a map from test filename to its ID
+		3) initialize a map from test ID to its filename
+		4) override the map with test filename-id dictionary in problem.toml
+		5) override the map with test id-filename dictionary in problem.toml
+		6) read tests into memory
+	*/
+	testFnamesSorted []string
+	testFilenameToID map[string]int
+	testIDOverwrite  map[string]int // read from problem.toml
+	testIDToFilename map[int]string
+	tests            []Test
 }
 
 type TestGroup struct {
@@ -43,7 +57,6 @@ type Test struct {
 	ID     int
 	Input  []byte
 	Answer []byte
-	Name   *string
 }
 
 type Example struct {
@@ -61,7 +74,6 @@ func NewTask(taskName string) (*Task, error) {
 		problemTomlContent:   []byte{},
 		problemTags:          []string{},
 		problemAuthors:       []string{},
-		tests:                []Test{},
 		mdStatements:         []MDStatement{},
 		taskName:             taskName,
 		originOlympiad:       "",
@@ -69,10 +81,17 @@ func NewTask(taskName string) (*Task, error) {
 		memoryMegabytes:      256,
 		cpuTimeSeconds:       1.0,
 		testGroups:           []TestGroup{},
+		examples:             []Example{},
+		exampleFilenameToID:  map[string]int{},
 		tGroupToStMap:        map[int]int{},
 		isTGroupPublic:       map[int]bool{},
 		tGroupPoints:         map[int]int{},
 		visibleInputSubtasks: []int{},
+		testFnamesSorted:     []string{},
+		testFilenameToID:     map[string]int{},
+		testIDOverwrite:      map[string]int{},
+		testIDToFilename:     map[int]string{},
+		tests:                []Test{},
 	}
 
 	return &t, nil
