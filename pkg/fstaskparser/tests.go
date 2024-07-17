@@ -75,7 +75,7 @@ func readTestsDir(srcDirPath string, fnameToID map[string]int) ([]test, error) {
 		})
 	}
 
-	log.Printf("Successfully read tests: %v\n", tests)
+	log.Printf("Successfully read tests")
 	return tests, nil
 }
 
@@ -136,7 +136,7 @@ func readExamplesDir(srcDirPath string) ([]example, error) {
 		})
 	}
 
-	log.Printf("Successfully read examples: %v\n", examples)
+	log.Printf("Successfully read examples")
 	return examples, nil
 }
 
