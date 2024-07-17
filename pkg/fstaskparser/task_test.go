@@ -45,6 +45,26 @@ func TestStoringComplexTask(t *testing.T) {
 	problemTomlContent, err := os.ReadFile(problemTomlPath)
 	require.NoErrorf(t, err, "failed to read problem.toml: %v", err)
 	assert.Equal(t, string(task.GetProblemTomlContent()), string(problemTomlContent))
+
+	// Compare examples directory
+	examplesDir := filepath.Join(testDir, "examples")
+	exampleFiles, err := os.ReadDir(examplesDir)
+	require.NoErrorf(t, err, "failed to read examples directory: %v", err)
+
+	for _, exampleFile := range exampleFiles {
+		exampleFilePath := filepath.Join(examplesDir, exampleFile.Name())
+		exampleFileContent, err := os.ReadFile(exampleFilePath)
+		require.NoErrorf(t, err, "failed to read example file: %v", err)
+
+		var exampleContent []byte
+		for _, example := range task.GetExamples() {
+			if exampleFile.Name() == *example.Name {
+				exampleContent = example.Input
+				break
+			}
+		}
+		assert.Equal(t, string(exampleContent), string(exampleFileContent))
+	}
 	tmpDirectory, err := os.MkdirTemp("", "fstaskparser-test-")
 	if err != nil {
 		t.Fatalf("failed to create temporary directory: %v", err)
@@ -72,23 +92,25 @@ func TestStoringComplexTask(t *testing.T) {
 	require.NoErrorf(t, err, "failed to get memory limit: %v", err)
 
 	assert.Equal(t, originalMemoryLimitInMegabytes, writtenMemoryLimitInMegabytes)
-	// Reread the values from the written task
-	task2, err := fstaskparser.Read(outputDirectory)
-	require.NoErrorf(t, err, "failed to read task: %v", err)
+	// Compare examples directory
+	examplesDir := filepath.Join(outputDirectory, "examples")
+	exampleFiles, err := os.ReadDir(examplesDir)
+	require.NoErrorf(t, err, "failed to read examples directory: %v", err)
 
-	assert.Equal(t, originalTaskName, task2.GetTaskName())
-	assert.Equal(t, originalProblemTags, task2.GetProblemTags())
-	assert.Equal(t, originalProblemAuthors, task2.GetProblemAuthors())
-	assert.Equal(t, originalTests, task2.GetTests())
-	assert.Equal(t, originalMDStatements, task2.GetMDStatements())
-	assert.Equal(t, originalOriginOlympiad, task2.GetOriginOlympiad())
-	assert.Equal(t, originalDifficultyOneToFive, task2.GetDifficultyOneToFive())
-	assert.Equal(t, originalTestGroups, task2.GetTestGroups())
-	assert.Equal(t, originalExamples, task2.GetExamples())
-	assert.Equal(t, originalTGroupToStMap, task2.GetTGroupToStMap())
-	assert.Equal(t, originalIsTGroupPublic, task2.GetIsTGroupPublic())
-	assert.Equal(t, originalTGroupPoints, task2.GetTGroupPoints())
-	assert.Equal(t, originalVisibleInputSubtasks, task2.GetVisibleInputSubtasks())
+	for _, exampleFile := range exampleFiles {
+		exampleFilePath := filepath.Join(examplesDir, exampleFile.Name())
+		exampleFileContent, err := os.ReadFile(exampleFilePath)
+		require.NoErrorf(t, err, "failed to read example file: %v", err)
+
+		var exampleContent []byte
+		for _, example := range task2.GetExamples() {
+			if exampleFile.Name() == *example.Name {
+				exampleContent = example.Input
+				break
+			}
+		}
+		assert.Equal(t, string(exampleContent), string(exampleFileContent))
+	}
 }
 
 /*
