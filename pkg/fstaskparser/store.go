@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 )
 
-const proglvFSTaskFormatSpecVersion = "v2.3.0"
+const proglvFSTaskFormatSpecVersOfScript = "v2.3.0"
 
 func (t *Task) Store(dirPath string) error {
 	if _, err := os.Stat(dirPath); !os.IsNotExist(err) {

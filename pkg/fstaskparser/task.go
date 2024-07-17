@@ -37,6 +37,9 @@ type MDStatement struct {
 
 // tests are executed in order of ID
 type Test struct {
+	// ID is the order in which the file comes in lexicographical order
+	// OR overriden by the filename-testID dictionary in problem.toml
+	// TODO: create the filename-testID dictionary
 	ID     int
 	Input  []byte
 	Answer []byte
@@ -44,6 +47,9 @@ type Test struct {
 }
 
 type Example struct {
+	// ID is the order in which the file comes in lexicographical order
+	// OR overriden by the filename-exampleID dictionary in problem.toml
+	// TODO: create the filename-exampleID dictionary
 	ID     int
 	Input  []byte
 	Output []byte

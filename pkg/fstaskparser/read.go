@@ -2,10 +2,10 @@ package fstaskparser
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"sort"
-	"strconv"
 	"strings"
 
 	"github.com/pelletier/go-toml/v2"
@@ -49,8 +49,25 @@ func Read(dirPath string) (*Task, error) {
 	}
 
 	specVers := specVersStruct.Specification
+	if len(specVers) == 0 {
+		return nil, fmt.Errorf("empty specification")
+	}
 	if specVers[0] == 'v' {
 		specVers = specVers[1:]
+	}
+
+	semVersCmpRes, err := getCmpSemVersionsResult(specVers, proglvFSTaskFormatSpecVersOfScript)
+	if err != nil {
+		return nil, fmt.Errorf("error comparing sem versions: %w", err)
+	}
+
+	// if the semantic version is larger we have a problem
+	if semVersCmpRes > 0 {
+		return nil, fmt.Errorf("unsupported specification version (too new): %s", specVers)
+	}
+
+	if semVersCmpRes < 0 {
+		log.Println("warning: unsupported specification version (too old):", specVers)
 	}
 
 	t.taskName, err = readTaskName(specVers, string(problemTomlContent))
@@ -90,36 +107,6 @@ func readTaskName(specVers string, tomlContent string) (string, error) {
 	}
 
 	return tomlStruct.TaskName, nil
-}
-
-func largerOrEqualSemVersionThan(a, b string) (bool, error) {
-	aParts := strings.Split(a, ".")
-	bParts := strings.Split(b, ".")
-
-	for i := 0; i < len(aParts) || i < len(bParts); i++ {
-		if i >= len(aParts) { // a is shorter and equal in the common part
-			return false, nil
-		}
-		if i >= len(bParts) { // b is shorter and equal in the common part
-			return true, nil
-		}
-		// cast to ints
-		a_i, err := strconv.Atoi(aParts[i])
-		if err != nil {
-			return false, fmt.Errorf("error converting version part to int: %w", err)
-		}
-		b_i, err := strconv.Atoi(bParts[i])
-		if err != nil {
-			return false, fmt.Errorf("error converting version part to int: %w", err)
-		}
-		if a_i < b_i {
-			return false, nil
-		}
-		if a_i > b_i {
-			return true, nil
-		}
-	}
-	return true, nil
 }
 
 func readTestsDir(srcDirPath string) ([]Test, error) {

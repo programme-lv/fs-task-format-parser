@@ -41,7 +41,7 @@ type PTomlTestGroup struct {
 
 func (task *Task) encodeProblemTOML() ([]byte, error) {
 	t := ProblemTOML{
-		Specification: proglvFSTaskFormatSpecVersion,
+		Specification: proglvFSTaskFormatSpecVersOfScript,
 		TaskName:      task.taskName,
 		Metadata: PTomlMetadata{
 			ProblemTags:        task.problemTags,
@@ -56,7 +56,7 @@ func (task *Task) encodeProblemTOML() ([]byte, error) {
 		TestGroups: []PTomlTestGroup{},
 		VisInpSTs:  []int{},
 	}
-	t.Specification = proglvFSTaskFormatSpecVersion
+	t.Specification = proglvFSTaskFormatSpecVersOfScript
 
 	// fill test groups
 	tGroupsWithSTAssigned := 0
