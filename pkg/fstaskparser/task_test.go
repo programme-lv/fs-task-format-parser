@@ -132,6 +132,61 @@ visible_input_subtasks = [1]
 
 	assert.True(t, foundExampleIn)
 	assert.True(t, foundExampleOut)
+	// Verify problem.toml
+	problemTomlPath := filepath.Join(outputDirectory, "problem.toml")
+	problemTomlContent, err := os.ReadFile(problemTomlPath)
+	require.NoErrorf(t, err, "failed to read problem.toml: %v", err)
+
+	expectedProblemTomlContent := `specification = '2.2'
+task_name = 'Kvadrātveida putekļsūcējs'
+visible_input_subtasks = [1]
+
+[metadata]
+  problem_tags = []
+  difficulty_1_to_5 = 3
+  task_authors = []
+  origin_olympiad = 'LIO'
+
+[constraints]
+  memory_megabytes = 256
+  cpu_time_seconds = 0.5
+
+[[test_groups]]
+  group_id = 1
+  points = 3
+  subtask = 1
+  public = true
+  test_filenames = ['kp01a.in', 'kp01b.in', 'kp01c.in', 'kp01a.out', 'kp01b.out', 'kp01c.out']
+
+[[test_groups]]
+  group_id = 2
+  points = 8
+  subtask = 2
+  public = true
+  test_filenames = ['kp02a.in', 'kp02b.in', 'kp02c.in', 'kp02a.out', 'kp02b.out', 'kp02c.out']
+`
+	assert.Equal(t, expectedProblemTomlContent, string(problemTomlContent))
+
+	// Verify examples directory
+	examplesDir := filepath.Join(outputDirectory, "examples")
+	exampleFiles, err := os.ReadDir(examplesDir)
+	require.NoErrorf(t, err, "failed to read examples directory: %v", err)
+
+	assert.Equal(t, 2, len(exampleFiles))
+
+	foundExampleIn := false
+	foundExampleOut := false
+	for _, f := range exampleFiles {
+		if f.Name() == "kp00.in" {
+			foundExampleIn = true
+		}
+		if f.Name() == "kp00.out" {
+			foundExampleOut = true
+		}
+	}
+
+	assert.True(t, foundExampleIn)
+	assert.True(t, foundExampleOut)
 }
 
 /*
