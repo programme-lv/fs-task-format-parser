@@ -7,7 +7,12 @@ import (
 	"github.com/pelletier/go-toml/v2"
 )
 
+func init() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+}
+
 func readTGroupFnames(specVers string, tomlContent []byte, tGroupIDs []int) (map[int][]string, error) {
+	log.Printf("Reading test group filenames for specification version: %s\n", specVers)
 	res := make(map[int][]string, len(tGroupIDs))
 	for i := 0; i < len(tGroupIDs); i++ {
 		res[tGroupIDs[i]] = []string{}
@@ -15,12 +20,12 @@ func readTGroupFnames(specVers string, tomlContent []byte, tGroupIDs []int) (map
 
 	semVerCmpRes, err := getCmpSemVersionsResult(specVers, "v2.2.0")
 	if err != nil {
+		log.Printf("Error comparing sem versions: %v\n", err)
 		return nil, fmt.Errorf("error comparing sem versions: %w", err)
 	}
 
 	if semVerCmpRes < 0 {
-		log.Printf("warning: skipping reading test group filenames (spec version: %s)\n", specVers)
-		// return empty map
+		log.Printf("Warning: skipping reading test group filenames (spec version: %s)\n", specVers)
 		return res, nil
 	}
 
@@ -32,8 +37,10 @@ func readTGroupFnames(specVers string, tomlContent []byte, tGroupIDs []int) (map
 	tomlStruct := struct {
 		Groups []testGroupInfo `toml:"test_groups"`
 	}{}
+
 	err = toml.Unmarshal(tomlContent, &tomlStruct)
 	if err != nil {
+		log.Printf("Error unmarshaling test groups: %v\n", err)
 		return nil, fmt.Errorf("error unmarshaling test groups: %w", err)
 	}
 
@@ -43,10 +50,12 @@ func readTGroupFnames(specVers string, tomlContent []byte, tGroupIDs []int) (map
 		}
 	}
 
+	log.Printf("Successfully read test group filenames: %v\n", res)
 	return res, nil
 }
 
 func readTGroupTestIDs(specVers string, tomlContent []byte, tGroupIDs []int) (map[int][]int, error) {
+	log.Printf("Reading test group test IDs for specification version: %s\n", specVers)
 	res := make(map[int][]int, len(tGroupIDs))
 	for i := 0; i < len(tGroupIDs); i++ {
 		res[tGroupIDs[i]] = []int{}
@@ -54,12 +63,12 @@ func readTGroupTestIDs(specVers string, tomlContent []byte, tGroupIDs []int) (ma
 
 	semVerCmpRes, err := getCmpSemVersionsResult(specVers, "v2.2.0")
 	if err != nil {
+		log.Printf("Error comparing sem versions: %v\n", err)
 		return nil, fmt.Errorf("error comparing sem versions: %w", err)
 	}
 
 	if semVerCmpRes < 0 {
-		log.Printf("warning: skipping reading test group test IDs (spec version: %s)\n", specVers)
-		// return empty map
+		log.Printf("Warning: skipping reading test group test IDs (spec version: %s)\n", specVers)
 		return res, nil
 	}
 
@@ -74,6 +83,7 @@ func readTGroupTestIDs(specVers string, tomlContent []byte, tGroupIDs []int) (ma
 
 	err = toml.Unmarshal(tomlContent, &tomlStruct)
 	if err != nil {
+		log.Printf("Error unmarshaling test group IDs: %v\n", err)
 		return nil, fmt.Errorf("failed to unmarshal the test group IDs: %w", err)
 	}
 
@@ -81,18 +91,20 @@ func readTGroupTestIDs(specVers string, tomlContent []byte, tGroupIDs []int) (ma
 		res[tomlStruct.Groups[i].GroupID] = tomlStruct.Groups[i].TestIDs
 	}
 
+	log.Printf("Successfully read test group test IDs: %v\n", res)
 	return res, nil
 }
 
 func readTGroupToStMap(specVers string, tomlContent []byte) (map[int]int, error) {
+	log.Printf("Reading test group to subtask map for specification version: %s\n", specVers)
 	semVerCmpRes, err := getCmpSemVersionsResult(specVers, "v2.2.0")
 	if err != nil {
+		log.Printf("Error comparing sem versions: %v\n", err)
 		return nil, fmt.Errorf("error comparing sem versions: %w", err)
 	}
 
 	if semVerCmpRes < 0 {
-		log.Printf("warning: skipping reading test group to subtask map (spec version: %s)\n", specVers)
-		// return empty map
+		log.Printf("Warning: skipping reading test group to subtask map (spec version: %s)\n", specVers)
 		return nil, nil
 	}
 
@@ -107,6 +119,7 @@ func readTGroupToStMap(specVers string, tomlContent []byte) (map[int]int, error)
 
 	err = toml.Unmarshal(tomlContent, &tomlStruct)
 	if err != nil {
+		log.Printf("Error unmarshaling test groups: %v\n", err)
 		return nil, fmt.Errorf("error unmarshaling test groups: %w", err)
 	}
 
@@ -114,15 +127,18 @@ func readTGroupToStMap(specVers string, tomlContent []byte) (map[int]int, error)
 
 	for _, group := range tomlStruct.Groups {
 		if _, ok := res[group.GroupID]; ok {
+			log.Printf("Duplicate group ID found: %d\n", group.GroupID)
 			return nil, fmt.Errorf("duplicate group ID: %d", group.GroupID)
 		}
 		res[group.GroupID] = group.Subtask
 	}
 
+	log.Printf("Successfully read test group to subtask map: %v\n", res)
 	return res, nil
 }
 
 func readTGroupPoints(specVers string, tomlContent []byte, tGroupIDs []int) (map[int]int, error) {
+	log.Printf("Reading test group points for specification version: %s\n", specVers)
 	res := make(map[int]int, len(tGroupIDs))
 
 	for _, id := range tGroupIDs {
@@ -131,12 +147,12 @@ func readTGroupPoints(specVers string, tomlContent []byte, tGroupIDs []int) (map
 
 	semVerCmpRes, err := getCmpSemVersionsResult(specVers, "v2.2.0")
 	if err != nil {
+		log.Printf("Error comparing sem versions: %v\n", err)
 		return nil, fmt.Errorf("error comparing sem versions: %w", err)
 	}
 
 	if semVerCmpRes < 0 {
-		log.Printf("warning: skipping reading test group points (spec version: %s)\n", specVers)
-		// return empty map
+		log.Printf("Warning: skipping reading test group points (spec version: %s)\n", specVers)
 		return res, nil
 	}
 
@@ -151,25 +167,28 @@ func readTGroupPoints(specVers string, tomlContent []byte, tGroupIDs []int) (map
 
 	err = toml.Unmarshal(tomlContent, &tomlStruct)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal the test group IDs: %w", err)
+		log.Printf("Error unmarshaling test group points: %v\n", err)
+		return nil, fmt.Errorf("failed to unmarshal the test group points: %w", err)
 	}
 
 	for _, group := range tomlStruct.Groups {
 		res[group.GroupID] = group.Points
 	}
 
+	log.Printf("Successfully read test group points: %v\n", res)
 	return res, nil
 }
 
 func readTestGroupIDs(specVers string, tomlContent []byte) ([]int, error) {
+	log.Printf("Reading test group IDs for specification version: %s\n", specVers)
 	semVerCmpRes, err := getCmpSemVersionsResult(specVers, "v2.2.0")
 	if err != nil {
+		log.Printf("Error comparing sem versions: %v\n", err)
 		return nil, fmt.Errorf("error comparing sem versions: %w", err)
 	}
 
 	if semVerCmpRes < 0 {
-		log.Printf("warning: skipping reading test group IDs (spec version: %s)\n", specVers)
-		// return empty map
+		log.Printf("Warning: skipping reading test group IDs (spec version: %s)\n", specVers)
 		return nil, nil
 	}
 
@@ -183,6 +202,7 @@ func readTestGroupIDs(specVers string, tomlContent []byte) ([]int, error) {
 
 	err = toml.Unmarshal(tomlContent, &tomlStruct)
 	if err != nil {
+		log.Printf("Error unmarshaling test group IDs: %v\n", err)
 		return nil, fmt.Errorf("failed to unmarshal the test group IDs: %w", err)
 	}
 
@@ -192,24 +212,26 @@ func readTestGroupIDs(specVers string, tomlContent []byte) ([]int, error) {
 		res[i] = group.TestGroupID
 	}
 
+	log.Printf("Successfully read test group IDs: %v\n", res)
 	return res, nil
 }
 
 func readIsTGroupPublic(specVers string, tomlContent []byte, tGroupIDs []int) (map[int]bool, error) {
+	log.Printf("Reading whether test groups are public for specification version: %s\n", specVers)
 	res := make(map[int]bool, len(tGroupIDs))
 
 	for _, id := range tGroupIDs {
-		res[id] = true // debatable whether it should be true
+		res[id] = true
 	}
 
 	semVerCmpRes, err := getCmpSemVersionsResult(specVers, "v2.2.0")
 	if err != nil {
+		log.Printf("Error comparing sem versions: %v\n", err)
 		return nil, fmt.Errorf("error comparing sem versions: %w", err)
 	}
 
 	if semVerCmpRes < 0 {
-		log.Printf("warning: skipping reading whether test groups are public (spec version: %s)\n", specVers)
-		// return empty map
+		log.Printf("Warning: skipping reading whether test groups are public (spec version: %s)\n", specVers)
 		return res, nil
 	}
 
@@ -224,17 +246,19 @@ func readIsTGroupPublic(specVers string, tomlContent []byte, tGroupIDs []int) (m
 
 	err = toml.Unmarshal(tomlContent, &tomlStruct)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal the test group IDs: %w", err)
+		log.Printf("Error unmarshaling test group public status: %v\n", err)
+		return nil, fmt.Errorf("failed to unmarshal the test group public status: %w", err)
 	}
 
 	for _, group := range tomlStruct.Groups {
 		_, ok := res[group.GroupID]
 		if !ok {
-			log.Println("warning: unknown test group ID:", group.GroupID)
+			log.Printf("Warning: unknown test group ID: %d\n", group.GroupID)
 			continue
 		}
 		res[group.GroupID] = group.Public
 	}
 
+	log.Printf("Successfully read test group public status: %v\n", res)
 	return res, nil
 }
