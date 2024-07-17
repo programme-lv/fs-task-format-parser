@@ -8,14 +8,13 @@ import (
 )
 
 type ProblemTOML struct {
-	Specification      string           `toml:"specification"`
-	TaskName           string           `toml:"task_name"`
-	Metadata           PTomlMetadata    `toml:"metadata"`
-	Constraints        PTomlConstraints `toml:"constraints"`
-	TestGroups         []PTomlTestGroup `toml:"test_groups"`
-	VisInpSTs          []int            `toml:"visible_input_subtasks"`
-	TestIDOverwrite    map[string]int   `toml:"test_id_overwrite"`
-	ExampleIDOverwrite map[string]int   `toml:"example_id_overwrite"`
+	Specification   string           `toml:"specification"`
+	TaskName        string           `toml:"task_name"`
+	Metadata        PTomlMetadata    `toml:"metadata"`
+	Constraints     PTomlConstraints `toml:"constraints"`
+	TestGroups      []PTomlTestGroup `toml:"test_groups"`
+	VisInpSTs       []int            `toml:"visible_input_subtasks"`
+	TestIDOverwrite map[string]int   `toml:"test_id_overwrite"`
 }
 
 type PTomlMetadata struct {

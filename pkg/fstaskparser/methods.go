@@ -74,7 +74,7 @@ func (t *Task) GetPublicTestGroups() []TestGroup {
 	return publicTestGroups
 }
 
-func (t *Task) GetTestIDFilename(testID int) *string {
+func (t *Task) GetTestFilenameFromID(testID int) *string {
 	filename, ok := t.testIDToFilename[testID]
 	if !ok {
 		return nil

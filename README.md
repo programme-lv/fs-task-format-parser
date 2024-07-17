@@ -6,7 +6,6 @@
 - added concept of ids to tests and examples
 - when parsing default file ids are assigned by lex order of filenames
 - test default ids can then be overriden by `test_id_overwrite` table
-- example default ids can be overriden by `example_id_overwrite` table
 - tests in test group can be specified by ids instead of filenames
 - ids dictate the order in which tests are run
 
@@ -16,7 +15,6 @@ filesystem ordering. It also makes toml files more readable.
 
 problem.toml spec
 - added `test_id_overwrite` (string to int map)
-- added `example_id_overwrite` (string to int map)
 - added `test_ids` to `test_groups` object
 
 ### version "2.2"

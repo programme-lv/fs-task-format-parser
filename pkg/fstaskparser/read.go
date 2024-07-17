@@ -189,13 +189,6 @@ func readTestIDOverwrite(specVers string, tomlContent []byte) (map[string]int, e
 	return tomlStruct.TestIDOverwrite, nil
 }
 
-/*
-
-	TestIDOverwrite    map[string]int   `toml:"test_id_overwrite"`
-	ExampleIDOverwrite map[string]int   `toml:"example_id_overwrite"`
-
-*/
-
 func readTestFNamesSorted(dirPath string) ([]string, error) {
 	fnames, err := os.ReadDir(dirPath)
 	if err != nil {

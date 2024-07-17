@@ -23,7 +23,7 @@ func TestReadingWritingTests(t *testing.T) {
 
 	parsedTestNames := []string{}
 	for i := 0; i < 6; i++ {
-		filename := parsedTask.GetTestIDFilename(parsedTests[i].ID)
+		filename := parsedTask.GetTestFilenameFromID(parsedTests[i].ID)
 		fnameNotPtr := ""
 		if filename != nil {
 			fnameNotPtr = *filename
@@ -48,7 +48,7 @@ func TestReadingWritingTests(t *testing.T) {
 	testPath := filepath.Join(testTaskPath, "tests")
 	expectedInputs := []string{}
 	for i := 0; i < 6; i++ {
-		filename := parsedTask.GetTestIDFilename(parsedTests[i].ID)
+		filename := parsedTask.GetTestFilenameFromID(parsedTests[i].ID)
 		fnameNotPtr := ""
 		if filename != nil {
 			fnameNotPtr = *filename
@@ -68,7 +68,7 @@ func TestReadingWritingTests(t *testing.T) {
 	}
 	expectedAnsers := []string{}
 	for i := 0; i < 6; i++ {
-		filename := parsedTask.GetTestIDFilename(parsedTests[i].ID)
+		filename := parsedTask.GetTestFilenameFromID(parsedTests[i].ID)
 		fnameNotPtr := ""
 		if filename != nil {
 			fnameNotPtr = *filename
@@ -100,7 +100,7 @@ func TestReadingWritingTests(t *testing.T) {
 	storedTestNames := []string{}
 	tests := storedTask.GetTests()
 	for i := 0; i < 6; i++ {
-		filename := storedTask.GetTestIDFilename(tests[i].ID)
+		filename := storedTask.GetTestFilenameFromID(tests[i].ID)
 		filenameNotPtr := ""
 		if filename != nil {
 			filenameNotPtr = *filename
