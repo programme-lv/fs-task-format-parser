@@ -39,7 +39,7 @@ type PTomlTestGroup struct {
 	TestFnames []string `toml:"test_filenames,omitempty"`
 }
 
-func (task *Task) encodeProblemTOML() ([]byte, error) {
+func (task *task) encodeProblemTOML() ([]byte, error) {
 	t := ProblemTOML{
 		Specification: proglvFSTaskFormatSpecVersOfScript,
 		TaskName:      task.taskName,

@@ -8,7 +8,7 @@ import (
 
 const proglvFSTaskFormatSpecVersOfScript = "v2.3.0"
 
-func (task *Task) Store(dirPath string) error {
+func (task *task) Store(dirPath string) error {
 	if _, err := os.Stat(dirPath); !os.IsNotExist(err) {
 		return fmt.Errorf("directory already exists: %s", dirPath)
 	}

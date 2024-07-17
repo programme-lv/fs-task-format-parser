@@ -11,25 +11,25 @@ import (
 	"github.com/pelletier/go-toml/v2"
 )
 
-func Read(dirPath string) (*Task, error) {
-	t := Task{
+func Read(dirPath string) (*task, error) {
+	t := task{
 		problemTomlContent:   []byte{},
 		problemTags:          []string{},
 		problemAuthors:       []string{},
-		mdStatements:         []MDStatement{},
+		mdStatements:         []mDStatement{},
 		taskName:             "",
 		originOlympiad:       "",
 		difficultyOneToFive:  0,
 		memoryMegabytes:      0,
 		cpuTimeSeconds:       0,
-		examples:             []Example{},
+		examples:             []example{},
 		exampleFilenameToID:  map[string]int{},
 		visibleInputSubtasks: []int{},
 		testFnamesSorted:     []string{},
 		testFilenameToID:     map[string]int{},
 		testIDOverwrite:      map[string]int{},
 		testIDToFilename:     map[int]string{},
-		tests:                []Test{},
+		tests:                []test{},
 		testGroupIDs:         []int{},
 		isTGroupPublic:       map[int]bool{},
 		tGroupPoints:         map[int]int{},
@@ -228,7 +228,7 @@ func readTGroupFnames(specVers string, tomlContent []byte, tGroupIDs []int) (map
 	}
 
 	if semVerCmpRes < 0 {
-		log.Println("warning: unsupported specification version (too old):", proglvFSTaskFormatSpecVersOfScript)
+		log.Printf("warning: skipping reading test group filenames (spec version: %s)\n", specVers)
 		// return empty map
 		return res, nil
 	}
@@ -267,7 +267,7 @@ func readTGroupTestIDs(specVers string, tomlContent []byte, tGroupIDs []int) (ma
 	}
 
 	if semVerCmpRes < 0 {
-		log.Println("warning: unsupported specification version (too old):", proglvFSTaskFormatSpecVersOfScript)
+		log.Printf("warning: skipping reading test group test IDs (spec version: %s)\n", specVers)
 		// return empty map
 		return res, nil
 	}
@@ -300,7 +300,7 @@ func readTGroupToStMap(specVers string, tomlContent []byte) (map[int]int, error)
 	}
 
 	if semVerCmpRes < 0 {
-		log.Println("warning: unsupported specification version (too old):", proglvFSTaskFormatSpecVersOfScript)
+		log.Printf("warning: skipping reading test group to subtask map (spec version: %s)\n", specVers)
 		// return empty map
 		return nil, nil
 	}
@@ -344,7 +344,7 @@ func readTGroupPoints(specVers string, tomlContent []byte, tGroupIDs []int) (map
 	}
 
 	if semVerCmpRes < 0 {
-		log.Println("warning: unsupported specification version (too old):", proglvFSTaskFormatSpecVersOfScript)
+		log.Printf("warning: skipping reading test group points (spec version: %s)\n", specVers)
 		// return empty map
 		return res, nil
 	}
@@ -377,7 +377,7 @@ func readTestGroupIDs(specVers string, tomlContent []byte) ([]int, error) {
 	}
 
 	if semVerCmpRes < 0 {
-		log.Println("warning: unsupported specification version (too old) when reading test group IDs:", proglvFSTaskFormatSpecVersOfScript)
+		log.Printf("warning: skipping reading test group IDs (spec version: %s)\n", specVers)
 		// return empty map
 		return nil, nil
 	}
@@ -417,7 +417,7 @@ func readIsTGroupPublic(specVers string, tomlContent []byte, tGroupIDs []int) (m
 	}
 
 	if semVerCmpRes < 0 {
-		log.Println("warning: unsupported specification version (too old) when reading whether test groups are public:", proglvFSTaskFormatSpecVersOfScript)
+		log.Printf("warning: skipping reading whether test groups are public (spec version: %s)\n", specVers)
 		// return empty map
 		return res, nil
 	}
@@ -455,7 +455,7 @@ func readTestIDOverwrite(specVers string, tomlContent []byte) (map[string]int, e
 	}
 
 	if semVerCmpRes < 0 {
-		log.Println("warning: unsupported specification version (too old):", proglvFSTaskFormatSpecVersOfScript)
+		log.Printf("warning: skipping reading test id overwrite (spec version: %s)\n", specVers)
 		// return empty map
 		return make(map[string]int), nil
 	}
@@ -685,7 +685,7 @@ func readDifficultyOneToFive(specVers string, tomlContent string) (int, error) {
 	return res, nil
 }
 
-func readTestsDir(srcDirPath string, fnameToID map[string]int) ([]Test, error) {
+func readTestsDir(srcDirPath string, fnameToID map[string]int) ([]test, error) {
 	dir := filepath.Join(srcDirPath, "tests")
 	entries, err := os.ReadDir(dir)
 	if err != nil {
@@ -695,7 +695,7 @@ func readTestsDir(srcDirPath string, fnameToID map[string]int) ([]Test, error) {
 	sort.Slice(entries, func(i, j int) bool {
 		return entries[i].Name() < entries[j].Name()
 	})
-	tests := make([]Test, 0, len(entries)/2)
+	tests := make([]test, 0, len(entries)/2)
 
 	for i := 0; i < len(entries); i += 2 {
 		inPath := filepath.Join(dir, entries[i].Name())
@@ -732,7 +732,7 @@ func readTestsDir(srcDirPath string, fnameToID map[string]int) ([]Test, error) {
 			return nil, fmt.Errorf("mapping from filename to id does not exist: %s", inFilenameBase)
 		}
 
-		tests = append(tests, Test{
+		tests = append(tests, test{
 			ID:     fnameToID[inFilenameBase],
 			Input:  input,
 			Answer: answer,
@@ -742,7 +742,7 @@ func readTestsDir(srcDirPath string, fnameToID map[string]int) ([]Test, error) {
 	return tests, nil
 }
 
-func readExamplesDir(srcDirPath string) ([]Example, error) {
+func readExamplesDir(srcDirPath string) ([]example, error) {
 	dir := filepath.Join(srcDirPath, "examples")
 	entries, err := os.ReadDir(dir)
 	if err != nil {
@@ -754,7 +754,7 @@ func readExamplesDir(srcDirPath string) ([]Example, error) {
 		return entries[i].Name() < entries[j].Name()
 	})
 
-	examples := make([]Example, 0, len(entries)/2)
+	examples := make([]example, 0, len(entries)/2)
 
 	for i := 0; i < len(entries); i += 2 {
 		inPath := filepath.Join(dir, entries[i].Name())
@@ -786,7 +786,7 @@ func readExamplesDir(srcDirPath string) ([]Example, error) {
 			return nil, fmt.Errorf("error reading answer file: %w", err)
 		}
 
-		examples = append(examples, Example{
+		examples = append(examples, example{
 			ID:     (i / 2) + 1,
 			Input:  input,
 			Output: answer,

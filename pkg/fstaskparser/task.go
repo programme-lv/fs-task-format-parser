@@ -1,19 +1,19 @@
 package fstaskparser
 
-type Task struct {
+type task struct {
 	problemTomlContent []byte
 
 	// specificationVersion string
 	// srcDirPath           string
 	problemTags          []string
 	problemAuthors       []string
-	mdStatements         []MDStatement
+	mdStatements         []mDStatement
 	taskName             string
 	originOlympiad       string
 	difficultyOneToFive  int
 	memoryMegabytes      int
 	cpuTimeSeconds       float64
-	examples             []Example
+	examples             []example
 	exampleFilenameToID  map[string]int
 	visibleInputSubtasks []int
 
@@ -31,7 +31,7 @@ type Task struct {
 	testFilenameToID map[string]int
 	testIDOverwrite  map[string]int
 	testIDToFilename map[int]string
-	tests            []Test
+	tests            []test
 
 	/*
 		=== TEST GROUPS ===
@@ -52,12 +52,7 @@ type Task struct {
 	tGroupFnames   map[int][]string
 }
 
-type TestGroup struct {
-	GroupID int
-	TestIDs []int
-}
-
-type MDStatement struct {
+type mDStatement struct {
 	Language *string
 	Story    string
 	Input    string
@@ -67,7 +62,7 @@ type MDStatement struct {
 }
 
 // tests are executed in order of ID
-type Test struct {
+type test struct {
 	// ID is the order in which the file comes in lexicographical order
 	// OR overriden by the filename-testID dictionary in problem.toml
 	// TODO: create the filename-testID dictionary
@@ -76,7 +71,7 @@ type Test struct {
 	Answer []byte
 }
 
-type Example struct {
+type example struct {
 	// ID is the order in which the file comes in lexicographical order
 	// OR overriden by the filename-exampleID dictionary in problem.toml
 	// TODO: create the filename-exampleID dictionary
@@ -86,29 +81,31 @@ type Example struct {
 	Name   *string
 }
 
-func NewTask(taskName string) (*Task, error) {
-	t := Task{
+func NewTask(taskName string) (*task, error) {
+	t := task{
 		problemTomlContent:   []byte{},
 		problemTags:          []string{},
 		problemAuthors:       []string{},
-		mdStatements:         []MDStatement{},
+		mdStatements:         []mDStatement{},
 		taskName:             taskName,
 		originOlympiad:       "",
 		difficultyOneToFive:  0,
 		memoryMegabytes:      256,
 		cpuTimeSeconds:       1.0,
-		examples:             []Example{},
+		examples:             []example{},
 		exampleFilenameToID:  map[string]int{},
 		visibleInputSubtasks: []int{},
-		testGroupIDs:         []int{},
-		isTGroupPublic:       map[int]bool{},
-		tGroupPoints:         map[int]int{},
-		tGroupToStMap:        map[int]int{},
 		testFnamesSorted:     []string{},
 		testFilenameToID:     map[string]int{},
 		testIDOverwrite:      map[string]int{},
 		testIDToFilename:     map[int]string{},
-		tests:                []Test{},
+		tests:                []test{},
+		testGroupIDs:         []int{},
+		isTGroupPublic:       map[int]bool{},
+		tGroupPoints:         map[int]int{},
+		tGroupToStMap:        map[int]int{},
+		tGroupTestIDs:        map[int][]int{},
+		tGroupFnames:         map[int][]string{},
 	}
 
 	return &t, nil

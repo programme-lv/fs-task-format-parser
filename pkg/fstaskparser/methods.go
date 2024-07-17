@@ -1,62 +1,58 @@
 package fstaskparser
 
-func (t *Task) GetCPUTimeLimitInSeconds() float64 {
+func (t *task) GetCPUTimeLimitInSeconds() float64 {
 	return t.cpuTimeSeconds
 }
 
-func (t *Task) GetMemoryLimitInMegabytes() int {
+func (t *task) GetMemoryLimitInMegabytes() int {
 	return t.memoryMegabytes
 }
 
-func (t *Task) GetFullTaskName() string {
-	return t.taskName
-}
-
-func (t *Task) GetTests() []Test {
+func (t *task) GetTests() []test {
 	return t.tests
 }
 
-func (t *Task) GetExamples() []Example {
+func (t *task) GetExamples() []example {
 	return t.examples
 }
 
-func (t *Task) GetTaskName() string {
+func (t *task) GetTaskName() string {
 	return t.taskName
 }
 
-func (t *Task) SetTaskName(name string) {
+func (t *task) SetTaskName(name string) {
 	t.taskName = name
 }
 
-func (t *Task) GetProblemTags() []string {
+func (t *task) GetProblemTags() []string {
 	return t.problemTags
 }
 
-func (t *Task) SetProblemTags(tags []string) {
+func (t *task) SetProblemTags(tags []string) {
 	t.problemTags = tags
 }
 
-func (t *Task) GetTaskAuthors() []string {
+func (t *task) GetTaskAuthors() []string {
 	return t.problemAuthors
 }
 
-func (t *Task) SetTaskAuthors(authors []string) {
+func (t *task) SetTaskAuthors(authors []string) {
 	t.problemAuthors = authors
 }
 
-func (t *Task) GetOriginOlympiad() string {
+func (t *task) GetOriginOlympiad() string {
 	return t.originOlympiad
 }
 
-func (t *Task) SetOriginOlympiad(origin string) {
+func (t *task) SetOriginOlympiad(origin string) {
 	t.originOlympiad = origin
 }
 
-func (t *Task) GetDifficultyOneToFive() int {
+func (t *task) GetDifficultyOneToFive() int {
 	return t.difficultyOneToFive
 }
 
-func (t *Task) SetDifficultyOneToFive(difficulty int) {
+func (t *task) SetDifficultyOneToFive(difficulty int) {
 	t.difficultyOneToFive = difficulty
 }
 
@@ -68,7 +64,7 @@ type TestGroupInfo struct {
 	Subtask int
 }
 
-func (t *Task) GetInfoOnTestGroup(id int) TestGroupInfo {
+func (t *task) GetInfoOnTestGroup(id int) TestGroupInfo {
 	return TestGroupInfo{
 		GroupID: id,
 		Points:  t.tGroupPoints[id],
@@ -78,24 +74,11 @@ func (t *Task) GetInfoOnTestGroup(id int) TestGroupInfo {
 	}
 }
 
-func (t *Task) GetTestGroupIDs() []int {
+func (t *task) GetTestGroupIDs() []int {
 	return t.testGroupIDs
 }
 
-func (t *Task) GetPublicTestGroupIDs() []int {
-	res := []int{}
-
-	for i, id := range t.testGroupIDs {
-		if t.isTGroupPublic[i] {
-			res = append(res, id)
-		}
-	}
-
-	return res
-
-}
-
-func (t *Task) GetTestFilenameFromID(testID int) string {
+func (t *task) GetTestFilenameFromID(testID int) string {
 	filename, ok := t.testIDToFilename[testID]
 	if !ok {
 		return ""
