@@ -79,6 +79,56 @@ func TestStoringComplexTask(t *testing.T) {
 	assert.True(t, foundKp02aOut)
 }
 
+func TestReadingInvalidTask(t *testing.T) {
+	invalidDir := filepath.Join(".", "..", "..", "testdata", "invalidtask")
+	_, err := fstaskparser.Read(invalidDir)
+	assert.Error(t, err, "expected an error when reading an invalid task")
+}
+
+func TestStoringAndReadingTaskWithNoTests(t *testing.T) {
+	task := &fstaskparser.Task{
+		problemTomlContent:   []byte{},
+		problemTags:          []string{},
+		problemAuthors:       []string{},
+		tests:                []fstaskparser.Test{},
+		mdStatements:         []fstaskparser.MDStatement{},
+		taskName:             "NoTestsTask",
+		originOlympiad:       "",
+		difficultyOneToFive:  1,
+		memoryMegabytes:      128,
+		cpuTimeSeconds:       0.1,
+		testGroups:           []fstaskparser.TestGroup{},
+		tGroupToStMap:        map[int]int{},
+		isTGroupPublic:       map[int]bool{},
+		tGroupPoints:         map[int]int{},
+		visibleInputSubtasks: []int{},
+	}
+
+	// Create a temporary directory for output
+	tmpDirectory, err := os.MkdirTemp("", "fstaskparser-test-")
+	if err != nil {
+		t.Fatalf("failed to create temporary directory: %v", err)
+	}
+	defer os.RemoveAll(tmpDirectory)
+
+	outputDirectory := filepath.Join(tmpDirectory, "noteststask")
+
+	t.Logf("Created directory for output: %s", outputDirectory)
+
+	err = task.Store(outputDirectory)
+	if err != nil {
+		t.Fatalf("failed to store task: %v", err)
+	}
+
+	task2, err := fstaskparser.Read(outputDirectory)
+	require.NoErrorf(t, err, "failed to read task: %v", err)
+
+	assert.Equal(t, task.taskName, task2.taskName)
+	assert.Equal(t, task.memoryMegabytes, task2.memoryMegabytes)
+	assert.Equal(t, task.cpuTimeSeconds, task2.cpuTimeSeconds)
+	assert.Equal(t, len(task.tests), len(task2.tests))
+}
+
 /*
 kvadrputekl problem.toml
 
