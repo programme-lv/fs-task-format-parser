@@ -15,14 +15,14 @@ func largerOrEqualSemVersionThan(a, b string) (bool, error) {
 	return cmpRes >= 0, nil
 }
 
-func smallerOrEqualSemVersionThan(a, b string) (bool, error) {
-	cmpRes, err := getCmpSemVersionsResult(a, b)
-	if err != nil {
-		return false, fmt.Errorf("error comparing sem versions: %w", err)
-	}
+// func smallerOrEqualSemVersionThan(a, b string) (bool, error) {
+// 	cmpRes, err := getCmpSemVersionsResult(a, b)
+// 	if err != nil {
+// 		return false, fmt.Errorf("error comparing sem versions: %w", err)
+// 	}
 
-	return cmpRes <= 0, nil
-}
+// 	return cmpRes <= 0, nil
+// }
 
 // getCmpSemVersionsResult compares two semantic versions and returns the result of the comparison.
 //
