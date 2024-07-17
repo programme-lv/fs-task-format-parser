@@ -11,10 +11,16 @@ import (
 	"github.com/pelletier/go-toml/v2"
 )
 
+func init() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+}
+
 func readTestsDir(srcDirPath string, fnameToID map[string]int) ([]test, error) {
+	log.Printf("Reading tests directory: %s\n", srcDirPath)
 	dir := filepath.Join(srcDirPath, "tests")
 	entries, err := os.ReadDir(dir)
 	if err != nil {
+		log.Printf("Error reading tests directory: %v\n", err)
 		return nil, fmt.Errorf("error reading tests directory: %w", err)
 	}
 
@@ -34,6 +40,7 @@ func readTestsDir(srcDirPath string, fnameToID map[string]int) ([]test, error) {
 		ansFilenameBase := strings.TrimSuffix(ansFilename, filepath.Ext(ansFilename))
 
 		if inFilenameBase != ansFilenameBase {
+			log.Printf("Input and answer file base names do not match: %s, %s\n", inFilenameBase, ansFilenameBase)
 			return nil, fmt.Errorf("input and answer file base names do not match: %s, %s", inFilenameBase, ansFilenameBase)
 		}
 
@@ -45,16 +52,19 @@ func readTestsDir(srcDirPath string, fnameToID map[string]int) ([]test, error) {
 
 		input, err := os.ReadFile(inPath)
 		if err != nil {
+			log.Printf("Error reading input file: %v\n", err)
 			return nil, fmt.Errorf("error reading input file: %w", err)
 		}
 
 		answer, err := os.ReadFile(ansPath)
 		if err != nil {
+			log.Printf("Error reading answer file: %v\n", err)
 			return nil, fmt.Errorf("error reading answer file: %w", err)
 		}
 
 		// check if mapping to id exists
 		if _, ok := fnameToID[inFilenameBase]; !ok {
+			log.Printf("Mapping from filename to id does not exist: %s\n", inFilenameBase)
 			return nil, fmt.Errorf("mapping from filename to id does not exist: %s", inFilenameBase)
 		}
 
@@ -65,13 +75,16 @@ func readTestsDir(srcDirPath string, fnameToID map[string]int) ([]test, error) {
 		})
 	}
 
+	log.Printf("Successfully read tests: %v\n", tests)
 	return tests, nil
 }
 
 func readExamplesDir(srcDirPath string) ([]example, error) {
+	log.Printf("Reading examples directory: %s\n", srcDirPath)
 	dir := filepath.Join(srcDirPath, "examples")
 	entries, err := os.ReadDir(dir)
 	if err != nil {
+		log.Printf("Error reading examples directory: %v\n", err)
 		return nil, fmt.Errorf("error reading examples directory: %w", err)
 	}
 	// tests are to be read exactly like examples
@@ -93,6 +106,7 @@ func readExamplesDir(srcDirPath string) ([]example, error) {
 		ansFilenameBase := strings.TrimSuffix(ansFilename, filepath.Ext(ansFilename))
 
 		if inFilenameBase != ansFilenameBase {
+			log.Printf("Input and answer file base names do not match: %s, %s\n", inFilenameBase, ansFilenameBase)
 			return nil, fmt.Errorf("input and answer file base names do not match: %s, %s", inFilenameBase, ansFilenameBase)
 		}
 
@@ -104,11 +118,13 @@ func readExamplesDir(srcDirPath string) ([]example, error) {
 
 		input, err := os.ReadFile(inPath)
 		if err != nil {
+			log.Printf("Error reading input file: %v\n", err)
 			return nil, fmt.Errorf("error reading input file: %w", err)
 		}
 
 		answer, err := os.ReadFile(ansPath)
 		if err != nil {
+			log.Printf("Error reading answer file: %v\n", err)
 			return nil, fmt.Errorf("error reading answer file: %w", err)
 		}
 
@@ -120,17 +136,20 @@ func readExamplesDir(srcDirPath string) ([]example, error) {
 		})
 	}
 
+	log.Printf("Successfully read examples: %v\n", examples)
 	return examples, nil
 }
 
 func readTestIDOverwrite(specVers string, tomlContent []byte) (map[string]int, error) {
+	log.Printf("Reading test ID overwrite for specification version: %s\n", specVers)
 	semVerCmpRes, err := getCmpSemVersionsResult(specVers, "v2.3.0")
 	if err != nil {
+		log.Printf("Error comparing sem versions: %v\n", err)
 		return nil, fmt.Errorf("error comparing sem versions: %w", err)
 	}
 
 	if semVerCmpRes < 0 {
-		log.Printf("warning: skipping reading test id overwrite (spec version: %s)\n", specVers)
+		log.Printf("Warning: skipping reading test ID overwrite (spec version: %s)\n", specVers)
 		// return empty map
 		return make(map[string]int), nil
 	}
@@ -141,15 +160,19 @@ func readTestIDOverwrite(specVers string, tomlContent []byte) (map[string]int, e
 
 	err = toml.Unmarshal(tomlContent, &tomlStruct)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal the test id overwrite: %w", err)
+		log.Printf("Failed to unmarshal the test ID overwrite: %v\n", err)
+		return nil, fmt.Errorf("failed to unmarshal the test ID overwrite: %w", err)
 	}
 
+	log.Printf("Successfully read test ID overwrite: %v\n", tomlStruct.TestIDOverwrite)
 	return tomlStruct.TestIDOverwrite, nil
 }
 
 func readTestFNamesSorted(dirPath string) ([]string, error) {
+	log.Printf("Reading test filenames sorted from directory: %s\n", dirPath)
 	fnames, err := os.ReadDir(dirPath)
 	if err != nil {
+		log.Printf("Error reading test filenames: %v\n", err)
 		return nil, fmt.Errorf("error reading test filenames: %w", err)
 	}
 
@@ -158,6 +181,7 @@ func readTestFNamesSorted(dirPath string) ([]string, error) {
 	})
 
 	if len(fnames)%2 != 0 {
+		log.Printf("Odd number of test filenames: %d\n", len(fnames))
 		return nil, fmt.Errorf("odd number of test filenames")
 	}
 
@@ -172,11 +196,13 @@ func readTestFNamesSorted(dirPath string) ([]string, error) {
 		b_name = b_name[:len(b_name)-len(filepath.Ext(b_name))]
 
 		if a_name != b_name {
+			log.Printf("Input and answer file base names do not match: %s, %s\n", a_name, b_name)
 			return nil, fmt.Errorf("input and answer file base names do not match: %s, %s", a_name, b_name)
 		}
 
 		res = append(res, a_name)
 	}
 
+	log.Printf("Successfully read test filenames sorted: %v\n", res)
 	return res, nil
 }
