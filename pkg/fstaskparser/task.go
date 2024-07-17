@@ -14,6 +14,7 @@ type Task struct {
 	memoryMegabytes      int
 	cpuTimeSeconds       float64
 	testGroups           []TestGroup
+	examples             []Example
 	tGroupToStMap        map[int]int
 	isTGroupPublic       map[int]bool
 	tGroupPoints         map[int]int
@@ -39,6 +40,13 @@ type Test struct {
 	ID     int
 	Input  []byte
 	Answer []byte
+	Name   *string
+}
+
+type Example struct {
+	ID     int
+	Input  []byte
+	Output []byte
 	Name   *string
 }
 

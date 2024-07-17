@@ -65,5 +65,38 @@ func (t *Task) Store(dirPath string) error {
 		}
 	}
 
+	examplesDirPath := filepath.Join(dirPath, "examples")
+	err = os.Mkdir(examplesDirPath, 0755)
+	if err != nil {
+		return fmt.Errorf("error creating examples directory: %w", err)
+	}
+
+	for i, e := range t.examples {
+		// treat tests and examples the same way
+
+		var inPath string = ""
+		var ansPath string = ""
+
+		if e.Name != nil {
+			inPath = filepath.Join(examplesDirPath, *e.Name+".in")
+			ansPath = filepath.Join(examplesDirPath, *e.Name+".out")
+		} else {
+			inName := fmt.Sprintf("%03d.in", i+1)
+			ansName := fmt.Sprintf("%03d.out", i+1)
+			inPath = filepath.Join(examplesDirPath, inName)
+			ansPath = filepath.Join(examplesDirPath, ansName)
+		}
+
+		err = os.WriteFile(inPath, e.Input, 0644)
+		if err != nil {
+			return fmt.Errorf("error writing input file: %w", err)
+		}
+
+		err = os.WriteFile(ansPath, e.Output, 0644)
+		if err != nil {
+			return fmt.Errorf("error writing answer file: %w", err)
+		}
+	}
+
 	return nil
 }

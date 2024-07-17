@@ -24,6 +24,7 @@ func Read(dirPath string) (*Task, error) {
 		memoryMegabytes:      0,
 		cpuTimeSeconds:       0,
 		testGroups:           []TestGroup{},
+		examples:             []Example{},
 		tGroupToStMap:        map[int]int{},
 		isTGroupPublic:       map[int]bool{},
 		tGroupPoints:         map[int]int{},
@@ -60,6 +61,11 @@ func Read(dirPath string) (*Task, error) {
 	t.tests, err = readTestsDir(dirPath)
 	if err != nil {
 		return nil, fmt.Errorf("error reading tests directory: %w", err)
+	}
+
+	t.examples, err = readExamplesDir(dirPath)
+	if err != nil {
+		return nil, fmt.Errorf("error reading examples directory: %w", err)
 	}
 
 	return &t, nil
@@ -167,4 +173,59 @@ func readTestsDir(srcDirPath string) ([]Test, error) {
 	}
 
 	return tests, nil
+}
+
+func readExamplesDir(srcDirPath string) ([]Example, error) {
+	dir := filepath.Join(srcDirPath, "examples")
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, fmt.Errorf("error reading examples directory: %w", err)
+	}
+	// tests are to be read exactly like examples
+
+	sort.Slice(entries, func(i, j int) bool {
+		return entries[i].Name() < entries[j].Name()
+	})
+
+	examples := make([]Example, 0, len(entries)/2)
+
+	for i := 0; i < len(entries); i += 2 {
+		inPath := filepath.Join(dir, entries[i].Name())
+		ansPath := filepath.Join(dir, entries[i+1].Name())
+
+		inFilename := entries[i].Name()
+		ansFilename := entries[i+1].Name()
+
+		inFilenameBase := strings.TrimSuffix(inFilename, filepath.Ext(inFilename))
+		ansFilenameBase := strings.TrimSuffix(ansFilename, filepath.Ext(ansFilename))
+
+		if inFilenameBase != ansFilenameBase {
+			return nil, fmt.Errorf("input and answer file base names do not match: %s, %s", inFilenameBase, ansFilenameBase)
+		}
+
+		// sometimes the test answer is stored as .out, sometimes as .ans
+		if strings.Contains(inFilename, ".ans") || strings.Contains(ansFilename, ".in") {
+			// swap the file paths
+			inPath, ansPath = ansPath, inPath
+		}
+
+		input, err := os.ReadFile(inPath)
+		if err != nil {
+			return nil, fmt.Errorf("error reading input file: %w", err)
+		}
+
+		answer, err := os.ReadFile(ansPath)
+		if err != nil {
+			return nil, fmt.Errorf("error reading answer file: %w", err)
+		}
+
+		examples = append(examples, Example{
+			ID:     (i / 2) + 1,
+			Input:  input,
+			Output: answer,
+			Name:   &inFilenameBase,
+		})
+	}
+
+	return examples, nil
 }
