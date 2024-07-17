@@ -77,7 +77,3 @@ func NewTask(taskName string) (*Task, error) {
 
 	return &t, nil
 }
-
-func (t *Task) GetTests() []Test {
-	return t.tests
-}

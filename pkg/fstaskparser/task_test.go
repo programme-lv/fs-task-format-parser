@@ -129,90 +129,85 @@ func TestReadingWritingEvaluationConstraints(t *testing.T) {
 	assert.Equal(t, 256, storedTask.GetMemoryLimitInMegabytes())
 }
 
-// func TestStoringComplexTask(t *testing.T) {
-// 	testDir := filepath.Join(".", "..", "..", "testdata", "kvadrputekl")
-// 	task, err := fstaskparser.Read(testDir)
-// 	if err != nil {
-// 		t.Fatalf("failed to read task: %v", err)
-// 	}
+func TestReadingWritingExamples(t *testing.T) {
+	parsedTask, err := fstaskparser.Read(testTaskPath)
+	require.NoErrorf(t, err, "failed to read task: %v", err)
 
-// 	originalCPUTimeLimitInSeconds := task.GetCPUTimeLimitInSeconds()
-// 	assert.Equal(t, 0.5, originalCPUTimeLimitInSeconds)
+	parsedExamples := parsedTask.GetExamples()
+	require.Equal(t, 1, len(parsedExamples))
 
-// 	originalMemoryLimitInMegabytes := task.GetMemoryLimitInMegabytes()
-// 	assert.Equal(t, 256, originalMemoryLimitInMegabytes)
+	parsedExampleNames := []string{}
+	for i := 0; i < 1; i++ {
+		parsedExampleNames = append(parsedExampleNames, *parsedExamples[i].Name)
+	}
+	expectedExampleNames := []string{"kp00"}
+	assert.Equal(t, expectedExampleNames, parsedExampleNames)
 
-// 	// Compare with real values on disk
-// 	problemTomlPath := filepath.Join(testDir, "problem.toml")
-// 	problemTomlContent, err := os.ReadFile(problemTomlPath)
-// 	require.NoErrorf(t, err, "failed to read problem.toml: %v", err)
-// 	assert.Equal(t, string(task.GetProblemTomlContent()), string(problemTomlContent))
+	parsedInputs := []string{}
+	for i := 0; i < 1; i++ {
+		parsedInputs = append(parsedInputs, string(parsedExamples[i].Input))
+	}
 
-// 	// Compare examples directory
-// 	examplesDir := filepath.Join(testDir, "examples")
-// 	exampleFiles, err := os.ReadDir(examplesDir)
-// 	require.NoErrorf(t, err, "failed to read examples directory: %v", err)
+	examplePath := filepath.Join(testTaskPath, "examples")
+	expectedInputs := []string{}
+	for i := 0; i < 1; i++ {
+		inPath := filepath.Join(examplePath, fmt.Sprintf("%s.in", *parsedExamples[i].Name))
 
-// 	for _, exampleFile := range exampleFiles {
-// 		exampleFilePath := filepath.Join(examplesDir, exampleFile.Name())
-// 		exampleFileContent, err := os.ReadFile(exampleFilePath)
-// 		require.NoErrorf(t, err, "failed to read example file: %v", err)
+		in, err := os.ReadFile(inPath)
+		require.NoErrorf(t, err, "failed to read input file: %v", err)
 
-// 		var exampleContent []byte
-// 		for _, example := range task.GetExamples() {
-// 			if exampleFile.Name() == *example.Name {
-// 				exampleContent = example.Input
-// 				break
-// 			}
-// 		}
-// 		assert.Equal(t, string(exampleContent), string(exampleFileContent))
-// 	}
-// 	tmpDirectory, err := os.MkdirTemp("", "fstaskparser-test-")
-// 	if err != nil {
-// 		t.Fatalf("failed to create temporary directory: %v", err)
-// 	}
-// 	defer os.RemoveAll(tmpDirectory)
+		expectedInputs = append(expectedInputs, string(in))
+	}
+	assert.Equal(t, expectedInputs, parsedInputs)
 
-// 	outputDirectory := filepath.Join(tmpDirectory, "kvadrputekl")
+	parsedOutputs := []string{}
+	for i := 0; i < 1; i++ {
+		parsedOutputs = append(parsedOutputs, string(parsedExamples[i].Output))
+	}
+	expectedOutputs := []string{}
+	for i := 0; i < 1; i++ {
+		outPath := filepath.Join(examplePath, fmt.Sprintf("%s.out", *parsedExamples[i].Name))
 
-// 	t.Logf("Created directory for output: %s", outputDirectory)
+		out, err := os.ReadFile(outPath)
+		require.NoErrorf(t, err, "failed to read output file: %v", err)
 
-// 	err = task.Store(outputDirectory)
-// 	if err != nil {
-// 		t.Fatalf("failed to store task: %v", err)
-// 	}
+		expectedOutputs = append(expectedOutputs, string(out))
+	}
 
-// 	task2, err := fstaskparser.Read(outputDirectory)
-// 	require.NoErrorf(t, err, "failed to read task: %v", err)
+	assert.Equal(t, expectedOutputs, parsedOutputs)
 
-// 	writtenCPUTimeLimitInSeconds := task2.GetCPUTimeLimitInSeconds()
-// 	assert.Equal(t, 0.5, writtenCPUTimeLimitInSeconds)
+	tmpDirectory, err := os.MkdirTemp("", "fstaskparser-test-")
+	require.NoErrorf(t, err, "failed to create temporary directory: %v", err)
+	defer os.RemoveAll(tmpDirectory)
 
-// 	writtenMemoryLimitInMegabytes := task2.GetMemoryLimitInMegabytes()
-// 	assert.Equal(t, originalMemoryLimitInMegabytes, writtenMemoryLimitInMegabytes)
+	outputDirectory := filepath.Join(tmpDirectory, "kvadrputekl")
 
-// 	// Compare examples directory
-// 	examplesDir2 := filepath.Join(outputDirectory, "examples")
-// 	exampleFiles2, err := os.ReadDir(examplesDir2)
-// 	require.NoErrorf(t, err, "failed to read examples directory: %v", err)
+	t.Logf("Created directory for output: %s", outputDirectory)
 
-// 	for _, exampleFile := range exampleFiles2 {
-// 		exampleFilePath := filepath.Join(examplesDir2, exampleFile.Name())
-// 		exampleFileContent, err := os.ReadFile(exampleFilePath)
-// 		require.NoErrorf(t, err, "failed to read example file: %v", err)
+	err = parsedTask.Store(outputDirectory)
+	require.NoErrorf(t, err, "failed to store task: %v", err)
 
-// 		var exampleContent []byte
-// 		for _, example := range task2.GetExamples() {
-// 			if exampleFile.Name() == *example.Name {
-// 				exampleContent = example.Input
-// 				break
-// 			}
-// 		}
-// 		assert.Equal(t, string(exampleContent), string(exampleFileContent))
-// 	}
+	storedTask, err := fstaskparser.Read(outputDirectory)
+	require.NoErrorf(t, err, "failed to read task: %v", err)
 
-// 	// TODO: compare all the values to originals
-// }
+	storedExampleNames := []string{}
+	for i := 0; i < 1; i++ {
+		storedExampleNames = append(storedExampleNames, *storedTask.GetExamples()[i].Name)
+	}
+	assert.Equal(t, expectedExampleNames, storedExampleNames)
+
+	storedInputs := []string{}
+	for i := 0; i < 1; i++ {
+		storedInputs = append(storedInputs, string(storedTask.GetExamples()[i].Input))
+	}
+	assert.Equal(t, expectedInputs, storedInputs)
+
+	storedOutputs := []string{}
+	for i := 0; i < 1; i++ {
+		storedOutputs = append(storedOutputs, string(storedTask.GetExamples()[i].Output))
+	}
+	assert.Equal(t, expectedOutputs, storedOutputs)
+}
 
 /*
 kvadrputekl problem.toml
