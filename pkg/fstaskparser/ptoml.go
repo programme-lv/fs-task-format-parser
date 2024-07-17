@@ -30,11 +30,12 @@ type PTomlConstraints struct {
 
 // PTomlTestGroup is a structure to store groups used in LIO test format
 type PTomlTestGroup struct {
-	GroupID int   `toml:"group_id"`
-	Points  int   `toml:"points"`
-	Public  bool  `toml:"public"`
-	Subtask *int  `toml:"subtask"` // nil if subtask id not found
-	TestIDs []int `toml:"test_ids"`
+	GroupID    int      `toml:"group_id"`
+	Points     int      `toml:"points"`
+	Public     bool     `toml:"public"`
+	Subtask    *int     `toml:"subtask"` // nil if subtask id not found
+	TestIDs    []int    `toml:"test_ids"`
+	TestFnames []string `toml:"test_filenames"` // either one is fine
 	// TestFnames []string `toml:"test_filenames"`
 }
 
