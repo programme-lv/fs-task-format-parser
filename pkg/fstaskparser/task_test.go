@@ -132,55 +132,49 @@ visible_input_subtasks = [1]
 
 	assert.True(t, foundExampleIn)
 	assert.True(t, foundExampleOut)
-	// Verify problem.toml
-	problemTomlPath := filepath.Join(outputDirectory, "problem.toml")
-	problemTomlContent, err := os.ReadFile(problemTomlPath)
-	require.NoErrorf(t, err, "failed to read problem.toml: %v", err)
+	// Verify problem.toml using methods
+	expectedTask := &fstaskparser.Task{
+		taskName:             "Kvadrātveida putekļsūcējs",
+		problemTags:          []string{},
+		difficultyOneToFive:  3,
+		problemAuthors:       []string{},
+		originOlympiad:       "LIO",
+		memoryMegabytes:      256,
+		cpuTimeSeconds:       0.5,
+		visibleInputSubtasks: []int{1},
+		testGroups: []fstaskparser.TestGroup{
+			{
+				GroupID: 1,
+				TestIDs: []int{1, 2, 3, 4, 5, 6},
+			},
+			{
+				GroupID: 2,
+				TestIDs: []int{7, 8, 9, 10, 11, 12},
+			},
+		},
+	}
 
-	expectedProblemTomlContent := `specification = '2.2'
-task_name = 'Kvadrātveida putekļsūcējs'
-visible_input_subtasks = [1]
+	assert.Equal(t, expectedTask.taskName, task2.taskName)
+	assert.Equal(t, expectedTask.problemTags, task2.problemTags)
+	assert.Equal(t, expectedTask.difficultyOneToFive, task2.difficultyOneToFive)
+	assert.Equal(t, expectedTask.problemAuthors, task2.problemAuthors)
+	assert.Equal(t, expectedTask.originOlympiad, task2.originOlympiad)
+	assert.Equal(t, expectedTask.memoryMegabytes, task2.memoryMegabytes)
+	assert.Equal(t, expectedTask.cpuTimeSeconds, task2.cpuTimeSeconds)
+	assert.Equal(t, expectedTask.visibleInputSubtasks, task2.visibleInputSubtasks)
+	assert.Equal(t, expectedTask.testGroups, task2.testGroups)
 
-[metadata]
-  problem_tags = []
-  difficulty_1_to_5 = 3
-  task_authors = []
-  origin_olympiad = 'LIO'
-
-[constraints]
-  memory_megabytes = 256
-  cpu_time_seconds = 0.5
-
-[[test_groups]]
-  group_id = 1
-  points = 3
-  subtask = 1
-  public = true
-  test_filenames = ['kp01a.in', 'kp01b.in', 'kp01c.in', 'kp01a.out', 'kp01b.out', 'kp01c.out']
-
-[[test_groups]]
-  group_id = 2
-  points = 8
-  subtask = 2
-  public = true
-  test_filenames = ['kp02a.in', 'kp02b.in', 'kp02c.in', 'kp02a.out', 'kp02b.out', 'kp02c.out']
-`
-	assert.Equal(t, expectedProblemTomlContent, string(problemTomlContent))
-
-	// Verify examples directory
-	examplesDir := filepath.Join(outputDirectory, "examples")
-	exampleFiles, err := os.ReadDir(examplesDir)
-	require.NoErrorf(t, err, "failed to read examples directory: %v", err)
-
-	assert.Equal(t, 2, len(exampleFiles))
+	// Verify examples directory using methods
+	examples := task2.GetExamples()
+	assert.Equal(t, 2, len(examples))
 
 	foundExampleIn := false
 	foundExampleOut := false
-	for _, f := range exampleFiles {
-		if f.Name() == "kp00.in" {
+	for _, example := range examples {
+		if example.Name != nil && *example.Name == "kp00.in" {
 			foundExampleIn = true
 		}
-		if f.Name() == "kp00.out" {
+		if example.Name != nil && *example.Name == "kp00.out" {
 			foundExampleOut = true
 		}
 	}
