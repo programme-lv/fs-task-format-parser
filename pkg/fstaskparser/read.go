@@ -128,8 +128,12 @@ func readCPUTimeLimitInSeconds(specVers string, tomlContent string) (float64, er
 		return 0, fmt.Errorf("unsupported specification version: %s", specVers)
 	}
 
+	type constraintsStruct struct {
+		CPUTimeLimitInSeconds float64 `toml:"cpu_time_seconds"`
+	}
+
 	tomlStruct := struct {
-		CPUTimeLimitInSeconds float64 `toml:"cpu_time_limit_in_seconds"`
+		Constraints constraintsStruct `toml:"constraints"`
 	}{}
 
 	err = toml.Unmarshal([]byte(tomlContent), &tomlStruct)
@@ -137,7 +141,7 @@ func readCPUTimeLimitInSeconds(specVers string, tomlContent string) (float64, er
 		return 0, fmt.Errorf("failed to unmarshal the cpu time limit: %w", err)
 	}
 
-	return tomlStruct.CPUTimeLimitInSeconds, nil
+	return tomlStruct.Constraints.CPUTimeLimitInSeconds, nil
 }
 
 func readMemoryLimitInMegabytes(specVers string, tomlContent string) (int, error) {
