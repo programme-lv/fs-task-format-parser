@@ -294,6 +294,34 @@ func TestReadingWritingTestGroups(t *testing.T) {
 
 	err = parsedTask.Store(outputDirectory)
 	require.NoErrorf(t, err, "failed to store task: %v", err)
+
+	writtenTask, err := fstaskparser.Read(outputDirectory)
+	require.NoErrorf(t, err, "failed to read task: %v", err)
+
+	writtenTestGroups := writtenTask.GetTestGroupIDs()
+	require.Equal(t, 2, len(writtenTestGroups))
+
+	firstWrittenTestGroup := writtenTask.GetInfoOnTestGroup(1)
+	assert.Equal(t, 1, firstWrittenTestGroup.GroupID)
+	assert.Equal(t, 3, firstWrittenTestGroup.Points)
+	assert.Equal(t, 1, firstWrittenTestGroup.Subtask)
+	assert.Equal(t, true, firstWrittenTestGroup.Public)
+	assert.Equal(t, []int{1, 2, 3}, firstWrittenTestGroup.TestIDs)
+
+	assert.Equal(t, "kp01a", writtenTask.GetTestFilenameFromID(1))
+	assert.Equal(t, "kp01b", writtenTask.GetTestFilenameFromID(2))
+	assert.Equal(t, "kp01c", writtenTask.GetTestFilenameFromID(3))
+
+	secondWrittenTestGroup := writtenTask.GetInfoOnTestGroup(2)
+	assert.Equal(t, 2, secondWrittenTestGroup.GroupID)
+	assert.Equal(t, 8, secondWrittenTestGroup.Points)
+	assert.Equal(t, 2, secondWrittenTestGroup.Subtask)
+	assert.Equal(t, false, secondWrittenTestGroup.Public)
+	assert.Equal(t, []int{4, 5, 6}, secondWrittenTestGroup.TestIDs)
+
+	assert.Equal(t, "kp02a", writtenTask.GetTestFilenameFromID(4))
+	assert.Equal(t, "kp02b", writtenTask.GetTestFilenameFromID(5))
+	assert.Equal(t, "kp02c", writtenTask.GetTestFilenameFromID(6))
 }
 
 /*

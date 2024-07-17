@@ -278,7 +278,7 @@ func readTGroupTestIDs(specVers string, tomlContent []byte, tGroupIDs []int) (ma
 	}
 
 	tomlStruct := struct {
-		groups []testGroupInfo `toml:"test_groups"`
+		Groups []testGroupInfo `toml:"test_groups"`
 	}{}
 
 	err = toml.Unmarshal(tomlContent, &tomlStruct)
@@ -286,8 +286,8 @@ func readTGroupTestIDs(specVers string, tomlContent []byte, tGroupIDs []int) (ma
 		return nil, fmt.Errorf("failed to unmarshal the test group IDs: %w", err)
 	}
 
-	for i := 0; i < len(tomlStruct.groups); i++ {
-		res[tomlStruct.groups[i].GroupID] = tomlStruct.groups[i].TestIDs
+	for i := 0; i < len(tomlStruct.Groups); i++ {
+		res[tomlStruct.Groups[i].GroupID] = tomlStruct.Groups[i].TestIDs
 	}
 
 	return res, nil
