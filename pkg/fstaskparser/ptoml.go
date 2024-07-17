@@ -20,7 +20,7 @@ type PTomlMetadata struct {
 	ProblemTags        []string `toml:"problem_tags"`
 	DifficultyFrom1To5 int      `toml:"difficulty_1_to_5"`
 	TaskAuthors        []string `toml:"task_authors"`
-	OriginOlympiad     *string  `toml:"origin_olympiad"`
+	OriginOlympiad     string   `toml:"origin_olympiad"`
 }
 
 type PTomlConstraints struct {
@@ -39,17 +39,12 @@ type PTomlTestGroup struct {
 }
 
 func (task *Task) encodeProblemTOML() ([]byte, error) {
-	difficultyOneToFive := 0
-	if task.difficultyOneToFive != nil {
-		difficultyOneToFive = *task.difficultyOneToFive
-	}
-
 	t := ProblemTOML{
 		Specification: proglvFSTaskFormatSpecVersion,
 		TaskName:      task.taskName,
 		Metadata: PTomlMetadata{
 			ProblemTags:        task.problemTags,
-			DifficultyFrom1To5: difficultyOneToFive,
+			DifficultyFrom1To5: task.difficultyOneToFive,
 			TaskAuthors:        task.problemAuthors,
 			OriginOlympiad:     task.originOlympiad,
 		},

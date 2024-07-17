@@ -9,8 +9,8 @@ type Task struct {
 	tests                []Test
 	mdStatements         []MDStatement
 	taskName             string
-	originOlympiad       *string
-	difficultyOneToFive  *int
+	originOlympiad       string
+	difficultyOneToFive  int
 	memoryMegabytes      int
 	cpuTimeSeconds       float64
 	testGroups           []TestGroup
@@ -50,8 +50,8 @@ func NewTask(taskName string) (*Task, error) {
 		tests:                []Test{},
 		mdStatements:         []MDStatement{},
 		taskName:             taskName,
-		originOlympiad:       new(string),
-		difficultyOneToFive:  new(int),
+		originOlympiad:       "",
+		difficultyOneToFive:  0,
 		memoryMegabytes:      256,
 		cpuTimeSeconds:       1.0,
 		testGroups:           []TestGroup{},

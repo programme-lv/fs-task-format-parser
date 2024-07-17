@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/pelletier/go-toml/v2"
@@ -18,8 +19,8 @@ func Read(dirPath string) (*Task, error) {
 		tests:                []Test{},
 		mdStatements:         []MDStatement{},
 		taskName:             "",
-		originOlympiad:       new(string),
-		difficultyOneToFive:  new(int),
+		originOlympiad:       "",
+		difficultyOneToFive:  0,
 		memoryMegabytes:      0,
 		cpuTimeSeconds:       0,
 		testGroups:           []TestGroup{},
@@ -46,7 +47,15 @@ func Read(dirPath string) (*Task, error) {
 		return nil, fmt.Errorf("failed to unmarshal the specification: %w", err)
 	}
 
-	// specificationVersion := specVersStruct.Specification
+	specVers := specVersStruct.Specification
+	if specVers[0] == 'v' {
+		specVers = specVers[1:]
+	}
+
+	t.taskName, err = readTaskName(specVers, string(problemTomlContent))
+	if err != nil {
+		return nil, fmt.Errorf("error reading task name: %w", err)
+	}
 
 	t.tests, err = readTestsDir(dirPath)
 	if err != nil {
@@ -54,6 +63,57 @@ func Read(dirPath string) (*Task, error) {
 	}
 
 	return &t, nil
+}
+
+func readTaskName(specVers string, tomlContent string) (string, error) {
+	cmpres, err := largerOrEqualSemVersionThan(specVers, "2.2")
+	if err != nil {
+		return "", fmt.Errorf("error comparing semversions: %w", err)
+	}
+	if !cmpres {
+		return "", fmt.Errorf("unsupported specification version: %s", specVers)
+	}
+
+	tomlStruct := struct {
+		TaskName string `toml:"task_name"`
+	}{}
+
+	err = toml.Unmarshal([]byte(tomlContent), &tomlStruct)
+	if err != nil {
+		return "", fmt.Errorf("failed to unmarshal the task name: %w", err)
+	}
+
+	return tomlStruct.TaskName, nil
+}
+
+func largerOrEqualSemVersionThan(a, b string) (bool, error) {
+	aParts := strings.Split(a, ".")
+	bParts := strings.Split(b, ".")
+
+	for i := 0; i < len(aParts) || i < len(bParts); i++ {
+		if i >= len(aParts) { // a is shorter and equal in the common part
+			return false, nil
+		}
+		if i >= len(bParts) { // b is shorter and equal in the common part
+			return true, nil
+		}
+		// cast to ints
+		a_i, err := strconv.Atoi(aParts[i])
+		if err != nil {
+			return false, fmt.Errorf("error converting version part to int: %w", err)
+		}
+		b_i, err := strconv.Atoi(bParts[i])
+		if err != nil {
+			return false, fmt.Errorf("error converting version part to int: %w", err)
+		}
+		if a_i < b_i {
+			return false, nil
+		}
+		if a_i > b_i {
+			return true, nil
+		}
+	}
+	return true, nil
 }
 
 func readTestsDir(srcDirPath string) ([]Test, error) {
