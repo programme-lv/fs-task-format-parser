@@ -21,6 +21,58 @@ type Task struct {
 	visibleInputSubtasks []int
 }
 
+func (t *Task) GetTaskName() string {
+	return t.taskName
+}
+
+func (t *Task) GetProblemTags() []string {
+	return t.problemTags
+}
+
+func (t *Task) GetProblemAuthors() []string {
+	return t.problemAuthors
+}
+
+func (t *Task) GetMDStatements() []MDStatement {
+	return t.mdStatements
+}
+
+func (t *Task) GetOriginOlympiad() string {
+	return t.originOlympiad
+}
+
+func (t *Task) GetDifficultyOneToFive() int {
+	return t.difficultyOneToFive
+}
+
+func (t *Task) GetTestGroups() []TestGroup {
+	return t.testGroups
+}
+
+func (t *Task) GetExamples() []Example {
+	return t.examples
+}
+
+func (t *Task) GetTGroupToStMap() map[int]int {
+	return t.tGroupToStMap
+}
+
+func (t *Task) GetIsTGroupPublic() map[int]bool {
+	return t.isTGroupPublic
+}
+
+func (t *Task) GetTGroupPoints() map[int]int {
+	return t.tGroupPoints
+}
+
+func (t *Task) GetVisibleInputSubtasks() []int {
+	return t.visibleInputSubtasks
+}
+
+func (t *Task) GetProblemTomlContent() []byte {
+	return t.problemTomlContent
+}
+
 type TestGroup struct {
 	GroupID int
 	TestIDs []int

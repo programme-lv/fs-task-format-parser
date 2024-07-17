@@ -25,7 +25,26 @@ func TestStoringComplexTask(t *testing.T) {
 	require.NoErrorf(t, err, "failed to get memory limit: %v", err)
 	assert.Equal(t, 256, originalMemoryLimitInMegabytes)
 
-	// Create a temporary directory for output
+	// Store original values
+	originalTaskName := task.GetTaskName()
+	originalProblemTags := task.GetProblemTags()
+	originalProblemAuthors := task.GetProblemAuthors()
+	originalTests := task.GetTests()
+	originalMDStatements := task.GetMDStatements()
+	originalOriginOlympiad := task.GetOriginOlympiad()
+	originalDifficultyOneToFive := task.GetDifficultyOneToFive()
+	originalTestGroups := task.GetTestGroups()
+	originalExamples := task.GetExamples()
+	originalTGroupToStMap := task.GetTGroupToStMap()
+	originalIsTGroupPublic := task.GetIsTGroupPublic()
+	originalTGroupPoints := task.GetTGroupPoints()
+	originalVisibleInputSubtasks := task.GetVisibleInputSubtasks()
+
+	// Compare with real values on disk
+	problemTomlPath := filepath.Join(testDir, "problem.toml")
+	problemTomlContent, err := os.ReadFile(problemTomlPath)
+	require.NoErrorf(t, err, "failed to read problem.toml: %v", err)
+	assert.Equal(t, string(task.GetProblemTomlContent()), string(problemTomlContent))
 	tmpDirectory, err := os.MkdirTemp("", "fstaskparser-test-")
 	if err != nil {
 		t.Fatalf("failed to create temporary directory: %v", err)
@@ -53,6 +72,23 @@ func TestStoringComplexTask(t *testing.T) {
 	require.NoErrorf(t, err, "failed to get memory limit: %v", err)
 
 	assert.Equal(t, originalMemoryLimitInMegabytes, writtenMemoryLimitInMegabytes)
+	// Reread the values from the written task
+	task2, err := fstaskparser.Read(outputDirectory)
+	require.NoErrorf(t, err, "failed to read task: %v", err)
+
+	assert.Equal(t, originalTaskName, task2.GetTaskName())
+	assert.Equal(t, originalProblemTags, task2.GetProblemTags())
+	assert.Equal(t, originalProblemAuthors, task2.GetProblemAuthors())
+	assert.Equal(t, originalTests, task2.GetTests())
+	assert.Equal(t, originalMDStatements, task2.GetMDStatements())
+	assert.Equal(t, originalOriginOlympiad, task2.GetOriginOlympiad())
+	assert.Equal(t, originalDifficultyOneToFive, task2.GetDifficultyOneToFive())
+	assert.Equal(t, originalTestGroups, task2.GetTestGroups())
+	assert.Equal(t, originalExamples, task2.GetExamples())
+	assert.Equal(t, originalTGroupToStMap, task2.GetTGroupToStMap())
+	assert.Equal(t, originalIsTGroupPublic, task2.GetIsTGroupPublic())
+	assert.Equal(t, originalTGroupPoints, task2.GetTGroupPoints())
+	assert.Equal(t, originalVisibleInputSubtasks, task2.GetVisibleInputSubtasks())
 }
 
 /*
