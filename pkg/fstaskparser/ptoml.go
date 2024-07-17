@@ -34,9 +34,9 @@ type PTomlTestGroup struct {
 	GroupID    int      `toml:"group_id"`
 	Points     int      `toml:"points"`
 	Public     bool     `toml:"public"`
-	Subtask    *int     `toml:"subtask,omitempty"` // nil if subtask id not found
+	Subtask    int      `toml:"subtask,omitempty"`
 	TestIDs    []int    `toml:"test_ids,omitempty"`
-	TestFnames []string `toml:"test_filenames,omitempty"` // either one is fine
+	TestFnames []string `toml:"test_filenames,omitempty"`
 }
 
 func (task *Task) encodeProblemTOML() ([]byte, error) {
@@ -59,38 +59,16 @@ func (task *Task) encodeProblemTOML() ([]byte, error) {
 	t.Specification = proglvFSTaskFormatSpecVersOfScript
 
 	// fill test groups
-	tGroupsWithSTAssigned := 0
-	for _, tg := range task.testGroups {
+	for _, tg := range task.testGroupIDs {
 		ptomlTestGroup := PTomlTestGroup{
-			GroupID: tg.GroupID,
-			Points:  0,
-			Public:  false,
-			Subtask: nil,
-			TestIDs: tg.TestIDs,
-		}
-
-		tGroupPoints, ok := task.tGroupPoints[tg.GroupID]
-		if ok {
-			ptomlTestGroup.Points = tGroupPoints
-		} else {
-			log.Fatalf("Group %d has no points assigned\n", tg.GroupID)
-		}
-
-		isPublic, ok := task.isTGroupPublic[tg.GroupID]
-		if ok {
-			ptomlTestGroup.Public = isPublic
-		}
-
-		tGroupSt, ok := task.tGroupToStMap[tg.GroupID]
-		if ok {
-			ptomlTestGroup.Subtask = &tGroupSt
-			tGroupsWithSTAssigned++
+			GroupID: tg,
+			Points:  task.tGroupPoints[tg],
+			Public:  task.isTGroupPublic[tg],
+			Subtask: task.tGroupToStMap[tg],
+			TestIDs: task.tGroupTestIDs[tg],
 		}
 
 		t.TestGroups = append(t.TestGroups, ptomlTestGroup)
-	}
-	if tGroupsWithSTAssigned != 0 && tGroupsWithSTAssigned != len(task.testGroups) {
-		log.Fatalf("Some test groups have subtasks assigned, while others don't\n")
 	}
 
 	// fill visible input subtasks

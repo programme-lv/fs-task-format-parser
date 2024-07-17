@@ -273,19 +273,10 @@ func TestReadingWritingTestGroups(t *testing.T) {
 	parsedTask, err := fstaskparser.Read(testTaskPath)
 	assert.NoErrorf(t, err, "failed to read task: %v", err)
 
-	parsedTestGroups := parsedTask.GetTestGroups()
+	parsedTestGroups := parsedTask.GetTestGroupIDs()
 	require.Equal(t, 2, len(parsedTestGroups))
 
-	expectedTestGroups := []fstaskparser.TestGroup{
-		{
-			GroupID: 1,
-			TestIDs: []int{1, 2, 3},
-		},
-		{
-			GroupID: 2,
-			TestIDs: []int{4, 5, 6},
-		},
-	}
+	expectedTestGroups := []int{1, 2}
 
 	assert.Equal(t, expectedTestGroups, parsedTestGroups)
 

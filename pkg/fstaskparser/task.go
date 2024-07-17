@@ -2,6 +2,7 @@ package fstaskparser
 
 type Task struct {
 	problemTomlContent []byte
+
 	// specificationVersion string
 	// srcDirPath           string
 	problemTags          []string
@@ -12,15 +13,12 @@ type Task struct {
 	difficultyOneToFive  int
 	memoryMegabytes      int
 	cpuTimeSeconds       float64
-	testGroups           []TestGroup
 	examples             []Example
 	exampleFilenameToID  map[string]int
-	tGroupToStMap        map[int]int
-	isTGroupPublic       map[int]bool
-	tGroupPoints         map[int]int
 	visibleInputSubtasks []int
 
 	/*
+		=== TESTS ===
 		1) read test filenames, sort them lexiographically
 		2) initialize a map from test filename to its ID
 		3) initialize a map from test ID to its filename
@@ -28,11 +26,26 @@ type Task struct {
 		5) override the map with test id-filename dictionary in problem.toml
 		6) read tests into memory
 	*/
+
 	testFnamesSorted []string
 	testFilenameToID map[string]int
-	testIDOverwrite  map[string]int // read from problem.toml
+	testIDOverwrite  map[string]int
 	testIDToFilename map[int]string
 	tests            []Test
+
+	/*
+		=== TEST GROUPS ===
+		1) read all group IDs from problem.toml
+		2) read wchich groups are public
+		3) reach how many points each group has
+		4) read to which subtask each group belongs
+	*/
+
+	testGroupIDs   []int
+	isTGroupPublic map[int]bool
+	tGroupPoints   map[int]int
+	tGroupToStMap  map[int]int
+	tGroupTestIDs  map[int][]int
 }
 
 type TestGroup struct {
@@ -80,13 +93,13 @@ func NewTask(taskName string) (*Task, error) {
 		difficultyOneToFive:  0,
 		memoryMegabytes:      256,
 		cpuTimeSeconds:       1.0,
-		testGroups:           []TestGroup{},
 		examples:             []Example{},
 		exampleFilenameToID:  map[string]int{},
-		tGroupToStMap:        map[int]int{},
+		visibleInputSubtasks: []int{},
+		testGroupIDs:         []int{},
 		isTGroupPublic:       map[int]bool{},
 		tGroupPoints:         map[int]int{},
-		visibleInputSubtasks: []int{},
+		tGroupToStMap:        map[int]int{},
 		testFnamesSorted:     []string{},
 		testFilenameToID:     map[string]int{},
 		testIDOverwrite:      map[string]int{},

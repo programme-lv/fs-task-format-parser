@@ -60,18 +60,39 @@ func (t *Task) SetDifficultyOneToFive(difficulty int) {
 	t.difficultyOneToFive = difficulty
 }
 
-func (t *Task) GetTestGroups() []TestGroup {
-	return t.testGroups
+type TestGroupInfo struct {
+	GroupID int
+	Points  int
+	Public  bool
+	TestIDs []int
+	Subtask int
 }
 
-func (t *Task) GetPublicTestGroups() []TestGroup {
-	var publicTestGroups []TestGroup
-	for i, tg := range t.testGroups {
+func (t *Task) GetInfoOnTestGroup(id int) TestGroupInfo {
+	return TestGroupInfo{
+		GroupID: id,
+		Points:  t.tGroupPoints[id],
+		Public:  t.isTGroupPublic[id],
+		TestIDs: t.tGroupTestIDs[id],
+		Subtask: t.tGroupToStMap[id],
+	}
+}
+
+func (t *Task) GetTestGroupIDs() []int {
+	return t.testGroupIDs
+}
+
+func (t *Task) GetPublicTestGroupIDs() []int {
+	res := []int{}
+
+	for i, id := range t.testGroupIDs {
 		if t.isTGroupPublic[i] {
-			publicTestGroups = append(publicTestGroups, tg)
+			res = append(res, id)
 		}
 	}
-	return publicTestGroups
+
+	return res
+
 }
 
 func (t *Task) GetTestFilenameFromID(testID int) *string {
