@@ -53,6 +53,30 @@ func TestStoringComplexTask(t *testing.T) {
 	require.NoErrorf(t, err, "failed to get memory limit: %v", err)
 
 	assert.Equal(t, originalMemoryLimitInMegabytes, writtenMemoryLimitInMegabytes)
+
+	// the tests after writing should have 12 files
+	// two of those files should be kp02a.in and kp02a.out
+
+	files, err := os.ReadDir(filepath.Join(outputDirectory, "tests"))
+	if err != nil {
+		t.Fatalf("failed to read tests directory: %v", err)
+	}
+
+	assert.Equal(t, 12, len(files))
+
+	foundKp02aIn := false
+	foundKp02aOut := false
+	for _, f := range files {
+		if f.Name() == "kp02a.in" {
+			foundKp02aIn = true
+		}
+		if f.Name() == "kp02a.out" {
+			foundKp02aOut = true
+		}
+	}
+
+	assert.True(t, foundKp02aIn)
+	assert.True(t, foundKp02aOut)
 }
 
 /*

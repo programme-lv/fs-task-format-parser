@@ -11,8 +11,8 @@ type Task struct {
 	taskName             string
 	originOlympiad       string
 	difficultyOneToFive  int
-	memoryMegabytes      int
-	cpuTimeSeconds       float64
+	memoryMegabytes      int     // DONE
+	cpuTimeSeconds       float64 // DONE
 	testGroups           []TestGroup
 	examples             []Example
 	tGroupToStMap        map[int]int
