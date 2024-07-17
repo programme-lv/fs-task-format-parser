@@ -153,8 +153,12 @@ func readMemoryLimitInMegabytes(specVers string, tomlContent string) (int, error
 		return 0, fmt.Errorf("unsupported specification version: %s", specVers)
 	}
 
+	type constraintsStruct struct {
+		MemoryLimitInMegabytes int `toml:"memory_megabytes"`
+	}
+
 	tomlStruct := struct {
-		MemoryMegabytes int `toml:"memory_megabytes"`
+		Constraints constraintsStruct `toml:"constraints"`
 	}{}
 
 	err = toml.Unmarshal([]byte(tomlContent), &tomlStruct)
@@ -162,7 +166,7 @@ func readMemoryLimitInMegabytes(specVers string, tomlContent string) (int, error
 		return 0, fmt.Errorf("failed to unmarshal the memory limit: %w", err)
 	}
 
-	return tomlStruct.MemoryMegabytes, nil
+	return tomlStruct.Constraints.MemoryLimitInMegabytes, nil
 }
 
 func readTestsDir(srcDirPath string) ([]Test, error) {

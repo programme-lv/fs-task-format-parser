@@ -1,6 +1,7 @@
 package fstaskparser_test
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -16,23 +17,42 @@ func TestStoringComplexTask(t *testing.T) {
 		t.Fatalf("failed to read task: %v", err)
 	}
 
-	originalCPUTimeLimitInSeconds, err := task.GetCPUTimeInSeconds()
+	originalCPUTimeLimitInSeconds, err := task.GetCPUTimeLimitInSeconds()
 	require.NoErrorf(t, err, "failed to get cpu time limit: %v", err)
-
 	assert.Equal(t, 0.5, originalCPUTimeLimitInSeconds)
 
-	err = task.Store(filepath.Join(".", "output"))
+	originalMemoryLimitInMegabytes, err := task.GetMemoryLimitInMegabytes()
+	require.NoErrorf(t, err, "failed to get memory limit: %v", err)
+	assert.Equal(t, 256, originalMemoryLimitInMegabytes)
+
+	// Create a temporary directory for output
+	tmpDirectory, err := os.MkdirTemp("", "fstaskparser-test-")
+	if err != nil {
+		t.Fatalf("failed to create temporary directory: %v", err)
+	}
+	defer os.RemoveAll(tmpDirectory)
+
+	outputDirectory := filepath.Join(tmpDirectory, "kvadrputekl")
+
+	t.Logf("Created directory for output: %s", outputDirectory)
+
+	err = task.Store(outputDirectory)
 	if err != nil {
 		t.Fatalf("failed to store task: %v", err)
 	}
 
-	task2, err := fstaskparser.Read(filepath.Join(".", "output"))
+	task2, err := fstaskparser.Read(outputDirectory)
 	require.NoErrorf(t, err, "failed to read task: %v", err)
 
-	writtenCPUTimeLimitInSeconds, err := task2.GetCPUTimeInSeconds()
+	writtenCPUTimeLimitInSeconds, err := task2.GetCPUTimeLimitInSeconds()
 	require.NoErrorf(t, err, "failed to get cpu time limit: %v", err)
 
 	assert.Equal(t, 0.5, writtenCPUTimeLimitInSeconds)
+
+	writtenMemoryLimitInMegabytes, err := task2.GetMemoryLimitInMegabytes()
+	require.NoErrorf(t, err, "failed to get memory limit: %v", err)
+
+	assert.Equal(t, originalMemoryLimitInMegabytes, writtenMemoryLimitInMegabytes)
 }
 
 /*
