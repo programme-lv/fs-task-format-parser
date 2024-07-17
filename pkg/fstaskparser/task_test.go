@@ -107,6 +107,28 @@ func TestReadingWritingTests(t *testing.T) {
 	assert.Equal(t, expectedAnsers, storedAnswers)
 }
 
+func TestReadingWritingEvaluationConstraints(t *testing.T) {
+	parsedTask, err := fstaskparser.Read(testTaskPath)
+	require.NoErrorf(t, err, "failed to read task: %v", err)
+	assert.Equal(t, 0.5, parsedTask.GetCPUTimeLimitInSeconds())
+	assert.Equal(t, 256, parsedTask.GetMemoryLimitInMegabytes())
+
+	tmpDirectory, err := os.MkdirTemp("", "fstaskparser-test-")
+	require.NoErrorf(t, err, "failed to create temporary directory: %v", err)
+	defer os.RemoveAll(tmpDirectory)
+
+	outputDirectory := filepath.Join(tmpDirectory, "kvadrputekl")
+	t.Logf("Created directory for output: %s", outputDirectory)
+
+	err = parsedTask.Store(outputDirectory)
+	require.NoErrorf(t, err, "failed to store task: %v", err)
+
+	storedTask, err := fstaskparser.Read(outputDirectory)
+	require.NoErrorf(t, err, "failed to read task: %v", err)
+	assert.Equal(t, 0.5, storedTask.GetCPUTimeLimitInSeconds())
+	assert.Equal(t, 256, storedTask.GetMemoryLimitInMegabytes())
+}
+
 // func TestStoringComplexTask(t *testing.T) {
 // 	testDir := filepath.Join(".", "..", "..", "testdata", "kvadrputekl")
 // 	task, err := fstaskparser.Read(testDir)
