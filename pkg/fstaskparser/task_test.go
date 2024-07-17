@@ -110,3 +110,30 @@ visible_input_subtasks = [1]
   public = true
   test_filenames = ['kp02a.in', 'kp02b.in', 'kp02c.in', 'kp02a.out', 'kp02b.out', 'kp02c.out']
 */
+
+/*
+/home/kp/Programming/PROGLV/fs-task-format-parser > tree ./testdata/kvadrputekl/
+./testdata/kvadrputekl/
+├── examples
+│   ├── kp00.in
+│   └── kp00.out
+├── problem.toml
+├── statements
+│   └── pdf
+│       └── lv.pdf
+└── tests
+    ├── kp01a.in
+    ├── kp01a.out
+    ├── kp01b.in
+    ├── kp01b.out
+    ├── kp01c.in
+    ├── kp01c.out
+    ├── kp02a.in
+    ├── kp02a.out
+    ├── kp02b.in
+    ├── kp02b.out
+    ├── kp02c.in
+    └── kp02c.out
+
+5 directories, 16 files
+*/

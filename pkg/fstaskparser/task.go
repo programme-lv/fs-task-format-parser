@@ -6,7 +6,7 @@ type Task struct {
 	// srcDirPath           string
 	problemTags          []string
 	problemAuthors       []string
-	tests                []Test
+	tests                []Test // DONE
 	mdStatements         []MDStatement
 	taskName             string
 	originOlympiad       string
