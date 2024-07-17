@@ -85,6 +85,11 @@ func Read(dirPath string) (*Task, error) {
 		return nil, fmt.Errorf("error reading memory limit: %w", err)
 	}
 
+	// originOlympiad       string
+	// difficultyOneToFive  int
+	// problemTags          []string
+	// problemAuthors       []string
+
 	t.tests, err = readTestsDir(dirPath)
 	if err != nil {
 		return nil, fmt.Errorf("error reading tests directory: %w", err)
@@ -97,6 +102,16 @@ func Read(dirPath string) (*Task, error) {
 
 	return &t, nil
 }
+
+/*
+
+type PTomlMetadata struct {
+	ProblemTags        []string `toml:"problem_tags"`
+	DifficultyFrom1To5 int      `toml:"difficulty_1_to_5"`
+	TaskAuthors        []string `toml:"task_authors"`
+	OriginOlympiad     string   `toml:"origin_olympiad"`
+}
+*/
 
 func readTaskName(specVers string, tomlContent string) (string, error) {
 	cmpres, err := largerOrEqualSemVersionThan(specVers, "2.2")
@@ -168,6 +183,17 @@ func readMemoryLimitInMegabytes(specVers string, tomlContent string) (int, error
 
 	return tomlStruct.Constraints.MemoryLimitInMegabytes, nil
 }
+
+// func readProblemTags(specVers string, tomlContent string) ([]string, error) {
+// 	cmpres, err := largerOrEqualSemVersionThan(specVers, "2.2")
+// 	if err != nil {
+// 		return nil, fmt.Errorf("error comparing semversions: %w", err)
+// 	}
+// 	if !cmpres {
+// 		return nil, fmt.Errorf("unsupported specification version: %s", specVers)
+// 	}
+
+// }
 
 func readTestsDir(srcDirPath string) ([]Test, error) {
 	dir := filepath.Join(srcDirPath, "tests")

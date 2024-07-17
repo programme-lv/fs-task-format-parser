@@ -209,6 +209,45 @@ func TestReadingWritingExamples(t *testing.T) {
 	assert.Equal(t, expectedOutputs, storedOutputs)
 }
 
+func TestReadingWritingMetadata(t *testing.T) {
+	parsedTask, err := fstaskparser.Read(testTaskPath)
+	require.NoErrorf(t, err, "failed to read task: %v", err)
+
+	// Set metadata using setters
+	parsedTask.SetTaskName("Kvadrātveida putekļsūcējs")
+	parsedTask.SetProblemTags([]string{"math", "geometry"})
+	parsedTask.SetTaskAuthors([]string{"Author1", "Author2"})
+	parsedTask.SetOriginOlympiad("LIO")
+	parsedTask.SetDifficultyOneToFive(3)
+
+	// Verify the set metadata using getters
+	assert.Equal(t, "Kvadrātveida putekļsūcējs", parsedTask.GetTaskName())
+	assert.Equal(t, []string{"math", "geometry"}, parsedTask.GetProblemTags())
+	assert.Equal(t, []string{"Author1", "Author2"}, parsedTask.GetTaskAuthors())
+	assert.Equal(t, "LIO", parsedTask.GetOriginOlympiad())
+	assert.Equal(t, 3, parsedTask.GetDifficultyOneToFive())
+
+	tmpDirectory, err := os.MkdirTemp("", "fstaskparser-test-")
+	require.NoErrorf(t, err, "failed to create temporary directory: %v", err)
+	defer os.RemoveAll(tmpDirectory)
+
+	outputDirectory := filepath.Join(tmpDirectory, "kvadrputekl")
+	t.Logf("Created directory for output: %s", outputDirectory)
+
+	err = parsedTask.Store(outputDirectory)
+	require.NoErrorf(t, err, "failed to store task: %v", err)
+
+	storedTask, err := fstaskparser.Read(outputDirectory)
+	require.NoErrorf(t, err, "failed to read task: %v", err)
+
+	// Verify the stored metadata using getters
+	assert.Equal(t, "Kvadrātveida putekļsūcējs", storedTask.GetTaskName())
+	assert.Equal(t, []string{"math", "geometry"}, storedTask.GetProblemTags())
+	assert.Equal(t, []string{"Author1", "Author2"}, storedTask.GetTaskAuthors())
+	assert.Equal(t, "LIO", storedTask.GetOriginOlympiad())
+	assert.Equal(t, 3, storedTask.GetDifficultyOneToFive())
+}
+
 /*
 kvadrputekl problem.toml
 
