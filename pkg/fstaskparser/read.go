@@ -1,0 +1,110 @@
+package fstaskparser
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"sort"
+	"strings"
+
+	"github.com/pelletier/go-toml/v2"
+)
+
+func Read(dirPath string) (*Task, error) {
+	t := Task{
+		problemTomlContent:   []byte{},
+		problemTags:          []string{},
+		problemAuthors:       []string{},
+		tests:                []Test{},
+		mdStatements:         []MDStatement{},
+		taskName:             "",
+		originOlympiad:       new(string),
+		difficultyOneToFive:  new(int),
+		memoryMegabytes:      0,
+		cpuTimeSeconds:       0,
+		testGroups:           []TestGroup{},
+		tGroupToStMap:        map[int]int{},
+		isTGroupPublic:       map[int]bool{},
+		tGroupPoints:         map[int]int{},
+		visibleInputSubtasks: []int{},
+	}
+
+	problemTomlPath := filepath.Join(dirPath, "problem.toml")
+	problemTomlContent, err := os.ReadFile(problemTomlPath)
+	if err != nil {
+		return nil, fmt.Errorf("error reading problem.toml: %w", err)
+	}
+
+	t.problemTomlContent = problemTomlContent
+
+	var specVersStruct struct {
+		Specification string `toml:"specification"`
+	}
+
+	err = toml.Unmarshal(problemTomlContent, &specVersStruct)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal the specification: %w", err)
+	}
+
+	// specificationVersion := specVersStruct.Specification
+
+	t.tests, err = readTestsDir(dirPath)
+	if err != nil {
+		return nil, fmt.Errorf("error reading tests directory: %w", err)
+	}
+
+	return &t, nil
+}
+
+func readTestsDir(srcDirPath string) ([]Test, error) {
+	dir := filepath.Join(srcDirPath, "tests")
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, fmt.Errorf("error reading tests directory: %w", err)
+	}
+
+	sort.Slice(entries, func(i, j int) bool {
+		return entries[i].Name() < entries[j].Name()
+	})
+	tests := make([]Test, 0, len(entries)/2)
+
+	for i := 0; i < len(entries); i += 2 {
+		inPath := filepath.Join(dir, entries[i].Name())
+		ansPath := filepath.Join(dir, entries[i+1].Name())
+
+		inFilename := entries[i].Name()
+		ansFilename := entries[i+1].Name()
+
+		inFilenameBase := strings.TrimSuffix(inFilename, filepath.Ext(inFilename))
+		ansFilenameBase := strings.TrimSuffix(ansFilename, filepath.Ext(ansFilename))
+
+		if inFilenameBase != ansFilenameBase {
+			return nil, fmt.Errorf("input and answer file base names do not match: %s, %s", inFilenameBase, ansFilenameBase)
+		}
+
+		// sometimes the test answer is stored as .out, sometimes as .ans
+		if strings.Contains(inFilename, ".ans") || strings.Contains(ansFilename, ".in") {
+			// swap the file paths
+			inPath, ansPath = ansPath, inPath
+		}
+
+		input, err := os.ReadFile(inPath)
+		if err != nil {
+			return nil, fmt.Errorf("error reading input file: %w", err)
+		}
+
+		answer, err := os.ReadFile(ansPath)
+		if err != nil {
+			return nil, fmt.Errorf("error reading answer file: %w", err)
+		}
+
+		tests = append(tests, Test{
+			ID:     (i / 2) + 1,
+			Input:  input,
+			Answer: answer,
+			Name:   &inFilenameBase,
+		})
+	}
+
+	return tests, nil
+}
