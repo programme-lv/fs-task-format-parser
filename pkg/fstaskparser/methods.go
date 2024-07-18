@@ -228,3 +228,12 @@ func (t *Task) AddTestGroup(points int, public bool, testIDs []int, subtask int)
 		log.Fatalf("error adding test group: %v", err)
 	}
 }
+
+func (t *Task) GetPDFStatement(lang string) ([]byte, error) {
+	statement, ok := t.pdfStatements[lang]
+	if !ok {
+		return nil, fmt.Errorf("pdf statement for language %s not found", lang)
+	}
+
+	return statement, nil
+}

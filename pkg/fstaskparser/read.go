@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/pelletier/go-toml/v2"
 )
@@ -20,7 +21,6 @@ func Read(dirPath string) (*Task, error) {
 		problemTomlContent:   []byte{},
 		problemTags:          []string{},
 		problemAuthors:       []string{},
-		mdStatements:         []mDStatement{},
 		taskName:             "",
 		originOlympiad:       "",
 		difficultyOneToFive:  0,
@@ -29,6 +29,8 @@ func Read(dirPath string) (*Task, error) {
 		examples:             []example{},
 		exampleFilenameToID:  map[string]int{},
 		visibleInputSubtasks: []int{},
+		mdStatements:         []mDStatement{},
+		pdfStatements:        map[string][]byte{},
 		testFnamesSorted:     []string{},
 		testFilenameToID:     map[string]int{},
 		testIDOverwrite:      map[string]int{},
@@ -246,8 +248,43 @@ func Read(dirPath string) (*Task, error) {
 		}
 	}
 
+	log.Println("Reading PDF statements")
+	t.pdfStatements, err = readPDFStatements(specVers, dirPath)
+	if err != nil {
+		log.Printf("Error reading PDF statements: %v\n", err)
+	}
+
 	log.Println("Successfully read and parsed task")
 	return &t, nil
+}
+
+func readPDFStatements(_ string, rootDirPath string) (map[string][]byte, error) {
+	pdfDirPath := filepath.Join(rootDirPath, "statements", "pdf")
+
+	res := make(map[string][]byte)
+	if _, err := os.Stat(pdfDirPath); os.IsNotExist(err) {
+		return res, fmt.Errorf("pdf directory does not exist: %s", pdfDirPath)
+	}
+
+	files, err := os.ReadDir(pdfDirPath)
+	if err != nil {
+		return res, fmt.Errorf("error reading pdf directory: %w", err)
+	}
+	/* lv.pdf */
+	for _, f := range files {
+		if !strings.HasSuffix(f.Name(), ".pdf") {
+			log.Fatalf("Unsupported PDF file: %s\n", f.Name())
+		}
+
+		content, err := os.ReadFile(filepath.Join(pdfDirPath, f.Name()))
+		if err != nil {
+			return nil, fmt.Errorf("error reading pdf file: %w", err)
+		}
+
+		res[f.Name()[0:len(f.Name())-4]] = content
+	}
+
+	return res, nil
 }
 
 func readTaskName(specVers string, tomlContent string) (string, error) {

@@ -44,7 +44,37 @@ func (task *Task) Store(dirPath string) error {
 	}
 	log.Println("examples written successfully")
 
+	err = task.storePDFStatements(filepath.Join(dirPath, "statements", "pdf"))
+	if err != nil {
+		log.Printf("Error storing PDF statements: %v\n", err)
+		return fmt.Errorf("error storing PDF statements: %w", err)
+	}
+	log.Println("PDF statements written successfully")
+
 	log.Printf("Task successfully stored in directory: %s\n", dirPath)
+	return nil
+}
+
+func (task *Task) storePDFStatements(pdfStatementsDir string) error {
+	err := os.MkdirAll(pdfStatementsDir, 0755)
+	if err != nil {
+		log.Printf("Error creating PDF statements directory: %v\n", err)
+		return fmt.Errorf("error creating PDF statements directory: %w", err)
+	}
+	log.Println("PDF statements directory created successfully")
+
+	for k, v := range task.pdfStatements {
+		// k is language, v is content
+		fname := fmt.Sprintf("%s.pdf", k)
+		fpath := filepath.Join(pdfStatementsDir, fname)
+		err = os.WriteFile(fpath, []byte(v), 0644)
+		if err != nil {
+			log.Printf("Error writing PDF statement: %v\n", err)
+			return fmt.Errorf("error writing PDF statement: %w", err)
+		}
+		log.Printf("PDF statement written to: %s\n", fpath)
+	}
+
 	return nil
 }
 

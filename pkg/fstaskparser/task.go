@@ -5,9 +5,9 @@ type Task struct {
 
 	// specificationVersion string
 	// srcDirPath           string
-	problemTags          []string
-	problemAuthors       []string
-	mdStatements         []mDStatement
+	problemTags    []string
+	problemAuthors []string
+
 	taskName             string
 	originOlympiad       string
 	difficultyOneToFive  int
@@ -16,6 +16,9 @@ type Task struct {
 	examples             []example
 	exampleFilenameToID  map[string]int
 	visibleInputSubtasks []int
+
+	mdStatements  []mDStatement
+	pdfStatements map[string][]byte // map language to pdf
 
 	/*
 		=== TESTS ===
@@ -85,7 +88,6 @@ func NewTask(taskName string) (*Task, error) {
 		problemTomlContent:   []byte{},
 		problemTags:          []string{},
 		problemAuthors:       []string{},
-		mdStatements:         []mDStatement{},
 		taskName:             taskName,
 		originOlympiad:       "",
 		difficultyOneToFive:  0,
@@ -94,6 +96,8 @@ func NewTask(taskName string) (*Task, error) {
 		examples:             []example{},
 		exampleFilenameToID:  map[string]int{},
 		visibleInputSubtasks: []int{},
+		mdStatements:         []mDStatement{},
+		pdfStatements:        map[string][]byte{},
 		testFnamesSorted:     []string{},
 		testFilenameToID:     map[string]int{},
 		testIDOverwrite:      map[string]int{},
