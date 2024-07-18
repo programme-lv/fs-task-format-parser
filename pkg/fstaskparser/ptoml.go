@@ -39,7 +39,7 @@ type PTomlTestGroup struct {
 	TestFnames []string `toml:"test_filenames,omitempty"`
 }
 
-func (task *task) encodeProblemTOML() ([]byte, error) {
+func (task *Task) encodeProblemTOML() ([]byte, error) {
 	testIDOverwrite := task.getTestIDByFilenameOverwriteMap()
 
 	t := ProblemTOML{

@@ -1,6 +1,6 @@
 package fstaskparser
 
-type task struct {
+type Task struct {
 	problemTomlContent []byte
 
 	// specificationVersion string
@@ -80,8 +80,8 @@ type example struct {
 	Name   *string
 }
 
-func NewTask(taskName string) (*task, error) {
-	t := task{
+func NewTask(taskName string) (*Task, error) {
+	t := Task{
 		problemTomlContent:   []byte{},
 		problemTags:          []string{},
 		problemAuthors:       []string{},

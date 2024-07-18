@@ -10,7 +10,7 @@ import (
 
 const proglvFSTaskFormatSpecVersOfScript = "v2.3.0"
 
-func (task *task) Store(dirPath string) error {
+func (task *Task) Store(dirPath string) error {
 	log.Printf("Starting to store task to directory: %s\n", dirPath)
 	if _, err := os.Stat(dirPath); !os.IsNotExist(err) {
 		log.Printf("Directory already exists: %s\n", dirPath)
@@ -48,7 +48,7 @@ func (task *task) Store(dirPath string) error {
 	return nil
 }
 
-func (task *task) storeProblemToml(problemTomlPath string) error {
+func (task *Task) storeProblemToml(problemTomlPath string) error {
 	pToml, err := task.encodeProblemTOML()
 	if err != nil {
 		log.Printf("Error encoding problem.toml: %v\n", err)
@@ -63,7 +63,7 @@ func (task *task) storeProblemToml(problemTomlPath string) error {
 	return nil
 }
 
-func (task *task) storeTests(testsDirPath string) error {
+func (task *Task) storeTests(testsDirPath string) error {
 	var err error
 	err = os.Mkdir(testsDirPath, 0755)
 	if err != nil {
@@ -95,7 +95,7 @@ func (task *task) storeTests(testsDirPath string) error {
 	return nil
 }
 
-func (task *task) getTestToBeWrittenFname(id int) string {
+func (task *Task) getTestToBeWrittenFname(id int) string {
 	if fname, ok := task.testIDToFilename[id]; ok {
 		return fname
 	} else {
@@ -103,7 +103,7 @@ func (task *task) getTestToBeWrittenFname(id int) string {
 	}
 }
 
-func (task *task) getTestIDByFilenameOverwriteMap() map[string]int {
+func (task *Task) getTestIDByFilenameOverwriteMap() map[string]int {
 	res := map[string]int{}
 
 	type testWrittenFilename struct {
@@ -133,7 +133,7 @@ func (task *task) getTestIDByFilenameOverwriteMap() map[string]int {
 	return res
 }
 
-func (task *task) storeExamples(examplesDirPath string) error {
+func (task *Task) storeExamples(examplesDirPath string) error {
 	var err error
 	err = os.Mkdir(examplesDirPath, 0755)
 	if err != nil {

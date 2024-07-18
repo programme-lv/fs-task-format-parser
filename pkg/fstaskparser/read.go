@@ -13,10 +13,10 @@ func init() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 }
 
-func Read(dirPath string) (*task, error) {
+func Read(dirPath string) (*Task, error) {
 	log.Printf("Starting to read directory: %s\n", dirPath)
 
-	t := task{
+	t := Task{
 		problemTomlContent:   []byte{},
 		problemTags:          []string{},
 		problemAuthors:       []string{},

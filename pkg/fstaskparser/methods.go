@@ -5,23 +5,23 @@ import (
 	"sort"
 )
 
-func (t *task) GetCPUTimeLimitInSeconds() float64 {
+func (t *Task) GetCPUTimeLimitInSeconds() float64 {
 	return t.cpuTimeSeconds
 }
 
-func (t *task) SetCPUTimeLimitInSeconds(seconds float64) {
+func (t *Task) SetCPUTimeLimitInSeconds(seconds float64) {
 	t.cpuTimeSeconds = seconds
 }
 
-func (t *task) GetMemoryLimitInMegabytes() int {
+func (t *Task) GetMemoryLimitInMegabytes() int {
 	return t.memoryMegabytes
 }
 
-func (t *task) SetMemoryLimitInMegabytes(megabytes int) {
+func (t *Task) SetMemoryLimitInMegabytes(megabytes int) {
 	t.memoryMegabytes = megabytes
 }
 
-func (t *task) SwapTestsWithIDs(id1 int, id2 int) {
+func (t *Task) SwapTestsWithIDs(id1 int, id2 int) {
 	id1Filename, id1HasFilename := t.testIDToFilename[id1]
 	id2Filename, id2HasFilename := t.testIDToFilename[id2]
 
@@ -63,7 +63,7 @@ func (t *task) SwapTestsWithIDs(id1 int, id2 int) {
 	}
 }
 
-func (t *task) GetTestsSortedByID() []test {
+func (t *Task) GetTestsSortedByID() []test {
 	sort.Slice(t.tests, func(i, j int) bool {
 		return t.tests[i].ID < t.tests[j].ID
 	})
@@ -72,7 +72,7 @@ func (t *task) GetTestsSortedByID() []test {
 }
 
 // creates a new test and returns its ID
-func (t *task) AddTest(input []byte, answer []byte) int {
+func (t *Task) AddTest(input []byte, answer []byte) int {
 	// find the minimum positive excluded id from tests
 
 	// we assign this test the number but it may not correspond to lex order
@@ -99,7 +99,7 @@ func (t *task) AddTest(input []byte, answer []byte) int {
 	return mex
 }
 
-func (t *task) AssignFilenameToTest(filename string, testID int) {
+func (t *Task) AssignFilenameToTest(filename string, testID int) {
 	_, ok1 := t.testIDToFilename[testID]
 	_, ok2 := t.testFilenameToID[filename]
 	if ok1 || ok2 {
@@ -110,47 +110,47 @@ func (t *task) AssignFilenameToTest(filename string, testID int) {
 	t.testFilenameToID[filename] = testID
 }
 
-func (t *task) GetExamples() []example {
+func (t *Task) GetExamples() []example {
 	return t.examples
 }
 
-func (t *task) GetTaskName() string {
+func (t *Task) GetTaskName() string {
 	return t.taskName
 }
 
-func (t *task) SetTaskName(name string) {
+func (t *Task) SetTaskName(name string) {
 	t.taskName = name
 }
 
-func (t *task) GetProblemTags() []string {
+func (t *Task) GetProblemTags() []string {
 	return t.problemTags
 }
 
-func (t *task) SetProblemTags(tags []string) {
+func (t *Task) SetProblemTags(tags []string) {
 	t.problemTags = tags
 }
 
-func (t *task) GetTaskAuthors() []string {
+func (t *Task) GetTaskAuthors() []string {
 	return t.problemAuthors
 }
 
-func (t *task) SetTaskAuthors(authors []string) {
+func (t *Task) SetTaskAuthors(authors []string) {
 	t.problemAuthors = authors
 }
 
-func (t *task) GetOriginOlympiad() string {
+func (t *Task) GetOriginOlympiad() string {
 	return t.originOlympiad
 }
 
-func (t *task) SetOriginOlympiad(origin string) {
+func (t *Task) SetOriginOlympiad(origin string) {
 	t.originOlympiad = origin
 }
 
-func (t *task) GetDifficultyOneToFive() int {
+func (t *Task) GetDifficultyOneToFive() int {
 	return t.difficultyOneToFive
 }
 
-func (t *task) SetDifficultyOneToFive(difficulty int) {
+func (t *Task) SetDifficultyOneToFive(difficulty int) {
 	t.difficultyOneToFive = difficulty
 }
 
@@ -162,7 +162,7 @@ type TestGroupInfo struct {
 	Subtask int
 }
 
-func (t *task) GetInfoOnTestGroup(id int) TestGroupInfo {
+func (t *Task) GetInfoOnTestGroup(id int) TestGroupInfo {
 	return TestGroupInfo{
 		GroupID: id,
 		Points:  t.tGroupPoints[id],
@@ -172,11 +172,11 @@ func (t *task) GetInfoOnTestGroup(id int) TestGroupInfo {
 	}
 }
 
-func (t *task) GetTestGroupIDs() []int {
+func (t *Task) GetTestGroupIDs() []int {
 	return t.testGroupIDs
 }
 
-func (t *task) GetTestFilenameFromID(testID int) string {
+func (t *Task) GetTestFilenameFromID(testID int) string {
 	filename, ok := t.testIDToFilename[testID]
 	if !ok {
 		return ""
