@@ -237,3 +237,13 @@ func (t *Task) GetPDFStatement(lang string) ([]byte, error) {
 
 	return statement, nil
 }
+
+func (t *Task) AddPDFStatement(lang string, statement []byte) error {
+	_, ok := t.pdfStatements[lang]
+	if ok {
+		return fmt.Errorf("pdf statement for language %s already exists", lang)
+	}
+
+	t.pdfStatements[lang] = statement
+	return nil
+}
