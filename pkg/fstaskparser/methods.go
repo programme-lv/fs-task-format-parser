@@ -1,6 +1,7 @@
 package fstaskparser
 
 import (
+	"fmt"
 	"log"
 	"sort"
 )
@@ -182,4 +183,48 @@ func (t *Task) GetTestFilenameFromID(testID int) string {
 		return ""
 	}
 	return filename
+}
+
+func (t *Task) testGroupWithIDExists(id int) bool {
+	for i := 0; i < len(t.testGroupIDs); i++ {
+		if t.testGroupIDs[i] == id {
+			return true
+		}
+	}
+	return false
+}
+
+func (t *Task) AddTestGroupWithID(groupID int, points int, public bool, testIDs []int, subtask int) error {
+	if t.testGroupWithIDExists(groupID) {
+		return fmt.Errorf("test group with ID %d already exists", groupID)
+	}
+	t.testGroupIDs = append(t.testGroupIDs, groupID)
+	t.isTGroupPublic[groupID] = public
+	t.tGroupPoints[groupID] = points
+	t.tGroupTestIDs[groupID] = testIDs
+	t.tGroupToStMap[groupID] = subtask
+
+	return nil
+}
+
+func (t *Task) testGroupMexPositiveID() int {
+	mex := 1
+	found := true
+	for found {
+		found = false
+		for i := 0; i < len(t.testGroupIDs); i++ {
+			if t.testGroupIDs[i] == mex {
+				found = true
+				mex++
+			}
+		}
+	}
+	return mex
+}
+
+func (t *Task) AddTestGroup(points int, public bool, testIDs []int, subtask int) {
+	err := t.AddTestGroupWithID(t.testGroupMexPositiveID(), points, public, testIDs, subtask)
+	if err != nil {
+		log.Fatalf("error adding test group: %v", err)
+	}
 }

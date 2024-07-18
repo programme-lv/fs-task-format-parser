@@ -367,6 +367,17 @@ func TestReadingWritingTestGroups(t *testing.T) {
 	assert.Equal(t, "kp02a", writtenTask.GetTestFilenameFromID(4))
 	assert.Equal(t, "kp02b", writtenTask.GetTestFilenameFromID(5))
 	assert.Equal(t, "kp02c", writtenTask.GetTestFilenameFromID(6))
+
+	createdTask, err := fstaskparser.NewTask(writtenTask.GetTaskName())
+	require.NoErrorf(t, err, "should have failed to create task: %v", err)
+
+	createdTask.AddTestGroup(3, true, []int{7, 8, 9}, 1)
+
+	assert.Equal(t, 1, createdTask.GetInfoOnTestGroup(1).GroupID)
+	assert.Equal(t, 3, createdTask.GetInfoOnTestGroup(1).Points)
+	assert.Equal(t, 1, createdTask.GetInfoOnTestGroup(1).Subtask)
+	assert.Equal(t, true, createdTask.GetInfoOnTestGroup(1).Public)
+	assert.Equal(t, []int{7, 8, 9}, createdTask.GetInfoOnTestGroup(1).TestIDs)
 }
 
 /*
