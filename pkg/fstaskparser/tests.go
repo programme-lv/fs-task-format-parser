@@ -129,7 +129,7 @@ func readExamplesDir(srcDirPath string) ([]example, error) {
 		}
 
 		examples = append(examples, example{
-			ID:     (i / 2) + 1,
+			// ID:     (i / 2) + 1,
 			Input:  input,
 			Output: answer,
 			Name:   &inFilenameBase,

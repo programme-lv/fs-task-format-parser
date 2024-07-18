@@ -115,6 +115,15 @@ func (t *Task) GetExamples() []example {
 	return t.examples
 }
 
+func (t *Task) AddExample(input []byte, output []byte) {
+	t.examples = append(t.examples, example{
+		// ID:     0,
+		Input:  input,
+		Output: output,
+		Name:   nil,
+	})
+}
+
 func (t *Task) GetTaskName() string {
 	return t.taskName
 }
@@ -245,5 +254,24 @@ func (t *Task) AddPDFStatement(lang string, statement []byte) error {
 	}
 
 	t.pdfStatements[lang] = statement
+	return nil
+}
+
+func (t *Task) AddVisibleInputSubtask(subtask int) error {
+	alreadyAdded := false
+
+	for i := 0; i < len(t.visibleInputSubtasks); i++ {
+		if t.visibleInputSubtasks[i] == subtask {
+			alreadyAdded = true
+		}
+	}
+
+	if alreadyAdded {
+		return fmt.Errorf("subtask %d already added", subtask)
+	}
+
+	t.visibleInputSubtasks = append(t.visibleInputSubtasks, subtask)
+	// sort by id
+	sort.Ints(t.visibleInputSubtasks)
 	return nil
 }

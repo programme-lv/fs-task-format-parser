@@ -256,7 +256,23 @@ func TestReadingWritingExamples(t *testing.T) {
 	}
 	assert.Equal(t, expectedOutputs, storedOutputs)
 
-	//
+	createdTask, err := fstaskparser.NewTask(storedTask.GetTaskName())
+	if err != nil {
+		t.Errorf("failed to create task: %v", err)
+	}
+
+	createdTask.AddExample([]byte(storedInputs[0]), []byte(storedOutputs[0]))
+
+	// store created task
+	outputDirectory2 := filepath.Join(tmpDirectory, "kvadrputekl2")
+	err = createdTask.Store(outputDirectory2)
+	require.NoErrorf(t, err, "failed to store task: %v", err)
+
+	storedTask2, err := fstaskparser.Read(outputDirectory2)
+	require.NoErrorf(t, err, "failed to read task: %v", err)
+
+	assert.Equal(t, storedTask2.GetExamples()[0].Input, parsedTask.GetExamples()[0].Input)
+	assert.Equal(t, storedTask2.GetExamples()[0].Output, parsedTask.GetExamples()[0].Output)
 }
 
 func TestReadingWritingMetadata(t *testing.T) {

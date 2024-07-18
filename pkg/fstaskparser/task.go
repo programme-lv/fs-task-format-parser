@@ -8,13 +8,13 @@ type Task struct {
 	problemTags    []string
 	problemAuthors []string
 
-	taskName             string
-	originOlympiad       string
-	difficultyOneToFive  int
-	memoryMegabytes      int
-	cpuTimeSeconds       float64
-	examples             []example
-	exampleFilenameToID  map[string]int
+	taskName            string
+	originOlympiad      string
+	difficultyOneToFive int
+	memoryMegabytes     int
+	cpuTimeSeconds      float64
+	examples            []example
+	// exampleFilenameToID  map[string]int
 	visibleInputSubtasks []int
 
 	mdStatements  []mDStatement
@@ -77,7 +77,7 @@ type example struct {
 	// ID is the order in which the file comes in lexicographical order
 	// OR overriden by the filename-exampleID dictionary in problem.toml
 	// TODO: create the filename-exampleID dictionary
-	ID     int
+	// ID     int
 	Input  []byte
 	Output []byte
 	Name   *string
@@ -85,16 +85,16 @@ type example struct {
 
 func NewTask(taskName string) (*Task, error) {
 	t := Task{
-		problemTomlContent:   []byte{},
-		problemTags:          []string{},
-		problemAuthors:       []string{},
-		taskName:             taskName,
-		originOlympiad:       "",
-		difficultyOneToFive:  0,
-		memoryMegabytes:      256,
-		cpuTimeSeconds:       1.0,
-		examples:             []example{},
-		exampleFilenameToID:  map[string]int{},
+		problemTomlContent:  []byte{},
+		problemTags:         []string{},
+		problemAuthors:      []string{},
+		taskName:            taskName,
+		originOlympiad:      "",
+		difficultyOneToFive: 0,
+		memoryMegabytes:     256,
+		cpuTimeSeconds:      1.0,
+		examples:            []example{},
+		// exampleFilenameToID:  map[string]int{},
 		visibleInputSubtasks: []int{},
 		mdStatements:         []mDStatement{},
 		pdfStatements:        map[string][]byte{},

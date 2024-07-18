@@ -14,7 +14,7 @@ type ProblemTOML struct {
 	Constraints     PTomlConstraints `toml:"constraints"`
 	TestGroups      []PTomlTestGroup `toml:"test_groups"`
 	VisInpSTs       []int            `toml:"visible_input_subtasks"`
-	TestIDOverwrite map[string]int   `toml:"test_id_overwrite"`
+	TestIDOverwrite map[string]int   `toml:"test_id_overwrite,omitempty"`
 }
 
 type PTomlMetadata struct {
@@ -55,12 +55,17 @@ func (task *Task) encodeProblemTOML() ([]byte, error) {
 
 	// fill test groups
 	for _, tg := range task.testGroupIDs {
+		testFnames := make([]string, 0)
+		for _, testID := range task.tGroupTestIDs[tg] {
+			testFnames = append(testFnames, task.getTestToBeWrittenFname(testID))
+		}
 		ptomlTestGroup := PTomlTestGroup{
 			GroupID: tg,
 			Points:  task.tGroupPoints[tg],
 			Public:  task.isTGroupPublic[tg],
 			Subtask: task.tGroupToStMap[tg],
-			TestIDs: task.tGroupTestIDs[tg],
+			// TestIDs: task.tGroupTestIDs[tg],
+			TestFnames: testFnames,
 		}
 
 		t.TestGroups = append(t.TestGroups, ptomlTestGroup)
