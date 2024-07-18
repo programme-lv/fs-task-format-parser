@@ -110,6 +110,20 @@ func TestReadingWritingTests(t *testing.T) {
 		storedAnswers = append(storedAnswers, string(storedTask.GetTests()[i].Answer))
 	}
 	assert.Equal(t, expectedAnsers, storedAnswers)
+
+	createdTask, err := fstaskparser.NewTask(storedTask.GetTaskName())
+	require.NoErrorf(t, err, "failed to create task: %v", err)
+
+	// set tests
+	for i := 0; i < 6; i++ {
+		createdTask.AddTest(parsedTests[i].Input, parsedTests[i].Answer)
+		if filename := createdTask.GetTestFilenameFromID(parsedTests[i].ID); filename != "" {
+			createdTask.AssignFilenameToTest(filename, parsedTests[i].ID)
+		}
+	}
+
+	// compare tests
+	assert.Equal(t, parsedTask.GetTests(), createdTask.GetTests())
 }
 
 func TestReadingWritingEvaluationConstraints(t *testing.T) {
