@@ -29,7 +29,7 @@ type task struct {
 
 	testFnamesSorted []string
 	testFilenameToID map[string]int
-	testIDOverwrite  map[string]int
+	testIDOverwrite  map[string]int // used only during reading directory
 	testIDToFilename map[int]string
 	tests            []test
 
@@ -49,7 +49,7 @@ type task struct {
 	tGroupPoints   map[int]int
 	tGroupToStMap  map[int]int
 	tGroupTestIDs  map[int][]int
-	tGroupFnames   map[int][]string
+	tGroupFnames   map[int][]string // used only during reading directory
 }
 
 type mDStatement struct {
@@ -65,7 +65,6 @@ type mDStatement struct {
 type test struct {
 	// ID is the order in which the file comes in lexicographical order
 	// OR overriden by the filename-testID dictionary in problem.toml
-	// TODO: create the filename-testID dictionary
 	ID     int
 	Input  []byte
 	Answer []byte

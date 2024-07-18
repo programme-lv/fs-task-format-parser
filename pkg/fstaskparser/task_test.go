@@ -2,6 +2,7 @@ package fstaskparser_test
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"testing"
@@ -18,7 +19,7 @@ func TestReadingWritingTests(t *testing.T) {
 	parsedTask, err := fstaskparser.Read(testTaskPath)
 	require.NoErrorf(t, err, "failed to read task: %v", err)
 
-	parsedTests := parsedTask.GetTests()
+	parsedTests := parsedTask.GetTestsSortedByID()
 	require.Equal(t, 6, len(parsedTests))
 
 	parsedTestNames := []string{}
@@ -73,7 +74,7 @@ func TestReadingWritingTests(t *testing.T) {
 
 	tmpDirectory, err := os.MkdirTemp("", "fstaskparser-test-")
 	require.NoErrorf(t, err, "failed to create temporary directory: %v", err)
-	defer os.RemoveAll(tmpDirectory)
+	// defer os.RemoveAll(tmpDirectory)
 
 	outputDirectory := filepath.Join(tmpDirectory, "kvadrputekl")
 
@@ -86,7 +87,7 @@ func TestReadingWritingTests(t *testing.T) {
 	require.NoErrorf(t, err, "failed to read task: %v", err)
 
 	storedTestNames := []string{}
-	tests := storedTask.GetTests()
+	tests := storedTask.GetTestsSortedByID()
 	for i := 0; i < 6; i++ {
 		filename := storedTask.GetTestFilenameFromID(tests[i].ID)
 		storedTestNames = append(storedTestNames, filename)
@@ -95,19 +96,19 @@ func TestReadingWritingTests(t *testing.T) {
 
 	storedIDs := []int{}
 	for i := 0; i < 6; i++ {
-		storedIDs = append(storedIDs, storedTask.GetTests()[i].ID)
+		storedIDs = append(storedIDs, storedTask.GetTestsSortedByID()[i].ID)
 	}
 	assert.Equal(t, expectedIDs, storedIDs)
 
 	storedInputs := []string{}
 	for i := 0; i < 6; i++ {
-		storedInputs = append(storedInputs, string(storedTask.GetTests()[i].Input))
+		storedInputs = append(storedInputs, string(storedTask.GetTestsSortedByID()[i].Input))
 	}
 	assert.Equal(t, expectedInputs, storedInputs)
 
 	storedAnswers := []string{}
 	for i := 0; i < 6; i++ {
-		storedAnswers = append(storedAnswers, string(storedTask.GetTests()[i].Answer))
+		storedAnswers = append(storedAnswers, string(storedTask.GetTestsSortedByID()[i].Answer))
 	}
 	assert.Equal(t, expectedAnsers, storedAnswers)
 
@@ -123,7 +124,26 @@ func TestReadingWritingTests(t *testing.T) {
 	}
 
 	// compare tests
-	assert.Equal(t, parsedTask.GetTests(), createdTask.GetTests())
+	assert.Equal(t, parsedTask.GetTestsSortedByID(), createdTask.GetTestsSortedByID())
+
+	// shuffle test order via assigning new ids or swapping pairwise
+	for i := 0; i < 10; i++ {
+		a := rand.Intn(6) + 1
+		b := rand.Intn(6) + 1
+		createdTask.SwapTestsWithIDs(a, b)
+	}
+
+	// store it again
+	anotherOutputDir := filepath.Join(tmpDirectory, "kvadrputekl2")
+
+	err = createdTask.Store(anotherOutputDir)
+	require.NoErrorf(t, err, "failed to store task: %v", err)
+
+	storedTask2, err := fstaskparser.Read(anotherOutputDir)
+	require.NoErrorf(t, err, "failed to read task: %v", err)
+
+	// compare the tests
+	assert.Equal(t, createdTask.GetTestsSortedByID(), storedTask2.GetTestsSortedByID())
 }
 
 func TestReadingWritingEvaluationConstraints(t *testing.T) {
@@ -146,6 +166,15 @@ func TestReadingWritingEvaluationConstraints(t *testing.T) {
 	require.NoErrorf(t, err, "failed to read task: %v", err)
 	assert.Equal(t, 0.5, storedTask.GetCPUTimeLimitInSeconds())
 	assert.Equal(t, 256, storedTask.GetMemoryLimitInMegabytes())
+
+	createdTask, err := fstaskparser.NewTask(storedTask.GetTaskName())
+	require.NoErrorf(t, err, "failed to create task: %v", err)
+
+	createdTask.SetCPUTimeLimitInSeconds(0.5)
+	createdTask.SetMemoryLimitInMegabytes(256)
+
+	assert.Equal(t, parsedTask.GetCPUTimeLimitInSeconds(), createdTask.GetCPUTimeLimitInSeconds())
+	assert.Equal(t, parsedTask.GetMemoryLimitInMegabytes(), createdTask.GetMemoryLimitInMegabytes())
 }
 
 func TestReadingWritingExamples(t *testing.T) {
@@ -226,6 +255,8 @@ func TestReadingWritingExamples(t *testing.T) {
 		storedOutputs = append(storedOutputs, string(storedTask.GetExamples()[i].Output))
 	}
 	assert.Equal(t, expectedOutputs, storedOutputs)
+
+	//
 }
 
 func TestReadingWritingMetadata(t *testing.T) {

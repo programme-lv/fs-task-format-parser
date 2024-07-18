@@ -40,21 +40,16 @@ type PTomlTestGroup struct {
 }
 
 func (task *task) encodeProblemTOML() ([]byte, error) {
+	testIDOverwrite := task.getTestIDByFilenameOverwriteMap()
+
 	t := ProblemTOML{
-		Specification: proglvFSTaskFormatSpecVersOfScript,
-		TaskName:      task.taskName,
-		Metadata: PTomlMetadata{
-			ProblemTags:        task.problemTags,
-			DifficultyFrom1To5: task.difficultyOneToFive,
-			TaskAuthors:        task.problemAuthors,
-			OriginOlympiad:     task.originOlympiad,
-		},
-		Constraints: PTomlConstraints{
-			MemoryMegabytes: task.memoryMegabytes,
-			CPUTimeSeconds:  task.cpuTimeSeconds,
-		},
-		TestGroups: []PTomlTestGroup{},
-		VisInpSTs:  []int{},
+		Specification:   proglvFSTaskFormatSpecVersOfScript,
+		TaskName:        task.taskName,
+		Metadata:        PTomlMetadata{ProblemTags: task.problemTags, DifficultyFrom1To5: task.difficultyOneToFive, TaskAuthors: task.problemAuthors, OriginOlympiad: task.originOlympiad},
+		Constraints:     PTomlConstraints{MemoryMegabytes: task.memoryMegabytes, CPUTimeSeconds: task.cpuTimeSeconds},
+		TestGroups:      []PTomlTestGroup{},
+		VisInpSTs:       task.visibleInputSubtasks,
+		TestIDOverwrite: testIDOverwrite,
 	}
 	t.Specification = proglvFSTaskFormatSpecVersOfScript
 
