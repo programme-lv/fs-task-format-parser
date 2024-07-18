@@ -71,9 +71,6 @@ func (task *Task) encodeProblemTOML() ([]byte, error) {
 		t.TestGroups = append(t.TestGroups, ptomlTestGroup)
 	}
 
-	// fill visible input subtasks
-	t.VisInpSTs = append(t.VisInpSTs, task.visibleInputSubtasks...)
-
 	buf := bytes.NewBuffer(make([]byte, 0))
 	err := toml.NewEncoder(buf).
 		SetTablesInline(false).
