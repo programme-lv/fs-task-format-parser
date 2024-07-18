@@ -74,7 +74,7 @@ func TestReadingWritingTests(t *testing.T) {
 
 	tmpDirectory, err := os.MkdirTemp("", "fstaskparser-test-")
 	require.NoErrorf(t, err, "failed to create temporary directory: %v", err)
-	// defer os.RemoveAll(tmpDirectory)
+	defer os.RemoveAll(tmpDirectory)
 
 	outputDirectory := filepath.Join(tmpDirectory, "kvadrputekl")
 
