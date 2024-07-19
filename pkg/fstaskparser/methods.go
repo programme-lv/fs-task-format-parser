@@ -292,3 +292,25 @@ func (t *Task) AddVisibleInputSubtask(subtask int) error {
 	sort.Ints(t.visibleInputSubtasks)
 	return nil
 }
+
+func (t *Task) GetVisibleInputSubtasks() []int {
+	return t.visibleInputSubtasks
+}
+
+type MarkdownStatement struct {
+	Language *string
+	Story    string
+	Input    string
+	Output   string
+	Notes    *string
+	Scoring  *string
+}
+
+func (t *Task) GetMarkdownStatements() []MarkdownStatement {
+	markdownStatements := make([]MarkdownStatement, 0, len(t.mdStatements))
+	for _, statement := range t.mdStatements {
+		markdownStatements = append(markdownStatements, MarkdownStatement(statement))
+	}
+
+	return markdownStatements
+}
