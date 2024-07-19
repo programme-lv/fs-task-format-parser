@@ -247,6 +247,23 @@ func (t *Task) GetPDFStatement(lang string) ([]byte, error) {
 	return statement, nil
 }
 
+type PDFStatement struct {
+	Language  string
+	Statement []byte
+}
+
+func (t *Task) GetAllPDFStatements() []PDFStatement {
+	pdfStatements := make([]PDFStatement, 0, len(t.pdfStatements))
+	for lang, statement := range t.pdfStatements {
+		pdfStatements = append(pdfStatements, PDFStatement{
+			Language:  lang,
+			Statement: statement,
+		})
+	}
+
+	return pdfStatements
+}
+
 func (t *Task) AddPDFStatement(lang string, statement []byte) error {
 	_, ok := t.pdfStatements[lang]
 	if ok {
