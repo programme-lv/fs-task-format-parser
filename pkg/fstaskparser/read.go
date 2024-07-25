@@ -254,8 +254,84 @@ func Read(dirPath string) (*Task, error) {
 		log.Printf("Error reading PDF statements: %v\n", err)
 	}
 
+	log.Println("Reading MD statements")
+	t.mdStatements, err = readMDStatements(specVers, dirPath)
+	if err != nil {
+		log.Printf("Error reading MD statements: %v\n", err)
+	}
+
 	log.Println("Successfully read and parsed task")
 	return &t, nil
+}
+
+func readMDStatements(_ string, rootDirPath string) ([]mDStatement, error) {
+	mdDirPath := filepath.Join(rootDirPath, "statements", "md")
+
+	res := make([]mDStatement, 0)
+	if _, err := os.Stat(mdDirPath); os.IsNotExist(err) {
+		log.Println("MD directory does not exist")
+		return res, nil
+		// return res, fmt.Errorf("md directory does not exist: %s", mdDirPath)
+	}
+
+	// statements -> md -> [language] -> {story.md,input.md,output.md}
+	langs, err := os.ReadDir(mdDirPath)
+	if err != nil {
+		return res, fmt.Errorf("error reading md directory: %w", err)
+	}
+
+	for _, lang := range langs {
+		if !lang.IsDir() {
+			continue
+		}
+
+		files, err := os.ReadDir(filepath.Join(mdDirPath, lang.Name()))
+		if err != nil {
+			return res, fmt.Errorf("error reading md directory: %w", err)
+		}
+
+		res2 := mDStatement{
+			Language: nil,
+			Story:    "",
+			Input:    "",
+			Output:   "",
+			Notes:    nil, // string pointer
+			Scoring:  nil, // string pointer
+		}
+		langStr := lang.Name()
+		res2.Language = &langStr
+		for _, f := range files {
+			if !strings.HasSuffix(f.Name(), ".md") {
+				continue
+			}
+
+			content, err := os.ReadFile(filepath.Join(mdDirPath, lang.Name(), f.Name()))
+			if err != nil {
+				return nil, fmt.Errorf("error reading md file: %w", err)
+			}
+
+			switch f.Name() {
+			case "story.md":
+				res2.Story = string(content)
+			case "input.md":
+				res2.Input = string(content)
+			case "output.md":
+				res2.Output = string(content)
+			case "notes.md":
+				res2.Notes = &([]string{string(content)}[0])
+			case "scoring.md":
+				res2.Scoring = &([]string{string(content)}[0])
+			}
+		}
+
+		if res2.Story == "" || res2.Input == "" || res2.Output == "" {
+			return nil, fmt.Errorf("invalid MD statement: %+v", res2)
+		}
+
+		res = append(res, res2)
+	}
+
+	return res, nil
 }
 
 func readPDFStatements(_ string, rootDirPath string) (map[string][]byte, error) {
@@ -263,7 +339,9 @@ func readPDFStatements(_ string, rootDirPath string) (map[string][]byte, error) 
 
 	res := make(map[string][]byte)
 	if _, err := os.Stat(pdfDirPath); os.IsNotExist(err) {
-		return res, fmt.Errorf("pdf directory does not exist: %s", pdfDirPath)
+		log.Println("PDF directory does not exist")
+		return res, nil
+		// return res, fmt.Errorf("pdf directory does not exist: %s", pdfDirPath)
 	}
 
 	files, err := os.ReadDir(pdfDirPath)
