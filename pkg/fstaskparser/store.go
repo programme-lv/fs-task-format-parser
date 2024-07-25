@@ -51,7 +51,87 @@ func (task *Task) Store(dirPath string) error {
 	}
 	log.Println("PDF statements written successfully")
 
+	err = task.storeMdStatements(filepath.Join(dirPath, "statements", "md"))
+	if err != nil {
+		log.Printf("Error storing Markdown statements: %v\n", err)
+		return fmt.Errorf("error storing Markdown statements: %w", err)
+	}
+	log.Println("Markdown statements written successfully")
+
 	log.Printf("Task successfully stored in directory: %s\n", dirPath)
+	return nil
+}
+
+func (task *Task) storeMdStatements(mdStatementDir string) error {
+	err := os.MkdirAll(mdStatementDir, 0755)
+	if err != nil {
+		log.Printf("Error creating Markdown statements directory: %v\n", err)
+		return fmt.Errorf("error creating Markdown statements directory: %w", err)
+	}
+	log.Println("Markdown statements directory created successfully")
+
+	for _, v := range task.mdStatements {
+		// create language directory
+		dirPath := filepath.Join(mdStatementDir, *v.Language)
+		err = os.MkdirAll(dirPath, 0755)
+		if err != nil {
+			log.Printf("Error creating Markdown statement directory: %v\n", err)
+			return fmt.Errorf("error creating Markdown statement directory: %w", err)
+		}
+		log.Printf("Markdown statement directory created: %s\n", dirPath)
+
+		inputPath := filepath.Join(dirPath, "input.md")
+		outputPath := filepath.Join(dirPath, "output.md")
+		storyPath := filepath.Join(dirPath, "story.md")
+		scoringPath := filepath.Join(dirPath, "scoring.md")
+		notesPath := filepath.Join(dirPath, "notes.md")
+
+		if v.Input != "" {
+			err = os.WriteFile(inputPath, []byte(v.Input), 0644)
+			if err != nil {
+				log.Printf("Error writing Markdown statement: %v\n", err)
+				return fmt.Errorf("error writing Markdown statement: %w", err)
+			}
+			log.Printf("Markdown statement written to: %s\n", inputPath)
+		}
+
+		if v.Output != "" {
+			err = os.WriteFile(outputPath, []byte(v.Output), 0644)
+			if err != nil {
+				log.Printf("Error writing Markdown statement: %v\n", err)
+				return fmt.Errorf("error writing Markdown statement: %w", err)
+			}
+			log.Printf("Markdown statement written to: %s\n", outputPath)
+		}
+
+		if v.Story != "" {
+			err = os.WriteFile(storyPath, []byte(v.Story), 0644)
+			if err != nil {
+				log.Printf("Error writing Markdown statement: %v\n", err)
+				return fmt.Errorf("error writing Markdown statement: %w", err)
+			}
+			log.Printf("Markdown statement written to: %s\n", storyPath)
+		}
+
+		if v.Scoring != nil {
+			err = os.WriteFile(scoringPath, []byte(*v.Scoring), 0644)
+			if err != nil {
+				log.Printf("Error writing Markdown statement: %v\n", err)
+				return fmt.Errorf("error writing Markdown statement: %w", err)
+			}
+			log.Printf("Markdown statement written to: %s\n", scoringPath)
+		}
+
+		if v.Notes != nil {
+			err = os.WriteFile(notesPath, []byte(*v.Notes), 0644)
+			if err != nil {
+				log.Printf("Error writing Markdown statement: %v\n", err)
+				return fmt.Errorf("error writing Markdown statement: %w", err)
+			}
+			log.Printf("Markdown statement written to: %s\n", notesPath)
+		}
+	}
+
 	return nil
 }
 

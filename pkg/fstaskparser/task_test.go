@@ -466,6 +466,31 @@ func TestReadingWritingMDStatements(t *testing.T) {
 		require.Equal(t, scoringMd, *mdStatement.Scoring)
 		require.Nil(t, mdStatement.Notes)
 	}
+
+	tmpDirectory, err := os.MkdirTemp("", "fstaskparser-test-")
+	require.NoErrorf(t, err, "failed to create temporary directory: %v", err)
+	defer os.RemoveAll(tmpDirectory)
+
+	outputDirectory := filepath.Join(tmpDirectory, "kvadrputekl")
+	t.Logf("Created directory for output: %s", outputDirectory)
+
+	err = parsedTask.Store(outputDirectory)
+	require.NoErrorf(t, err, "failed to store task: %v", err)
+
+	storedTask, err := fstaskparser.Read(outputDirectory)
+	require.NoErrorf(t, err, "failed to read task: %v", err)
+	parsedMdStatements2 := storedTask.GetMarkdownStatements()
+	require.Equal(t, 1, len(parsedMdStatements2))
+	for _, mdStatement := range parsedMdStatements2 {
+		lang := mdStatement.Language
+		require.NotNil(t, lang)
+		require.Equal(t, "lv", *lang)
+		require.Equal(t, inputMd, mdStatement.Input)
+		require.Equal(t, outputMd, mdStatement.Output)
+		require.Equal(t, storyMd, mdStatement.Story)
+		require.Equal(t, scoringMd, *mdStatement.Scoring)
+		require.Nil(t, mdStatement.Notes)
+	}
 }
 
 /*
