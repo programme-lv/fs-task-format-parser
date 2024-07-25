@@ -314,3 +314,10 @@ func (t *Task) GetMarkdownStatements() []MarkdownStatement {
 
 	return markdownStatements
 }
+
+func (t *Task) SetMarkdownStatements(statements []MarkdownStatement) {
+	t.mdStatements = make([]mDStatement, 0, len(statements))
+	for _, statement := range statements {
+		t.mdStatements = append(t.mdStatements, mDStatement(statement))
+	}
+}
