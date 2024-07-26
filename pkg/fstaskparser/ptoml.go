@@ -8,13 +8,14 @@ import (
 )
 
 type ProblemTOML struct {
-	Specification   string           `toml:"specification"`
-	TaskName        string           `toml:"task_name"`
-	Metadata        PTomlMetadata    `toml:"metadata"`
-	Constraints     PTomlConstraints `toml:"constraints"`
-	TestGroups      []PTomlTestGroup `toml:"test_groups"`
-	VisInpSTs       []int            `toml:"visible_input_subtasks"`
-	TestIDOverwrite map[string]int   `toml:"test_id_overwrite,omitempty"`
+	Specification        string           `toml:"specification"`
+	TaskName             string           `toml:"task_name"`
+	Metadata             PTomlMetadata    `toml:"metadata"`
+	Constraints          PTomlConstraints `toml:"constraints"`
+	TestGroups           []PTomlTestGroup `toml:"test_groups"`
+	IllustrationImgFname string           `toml:"illustration_image,omitempty"`
+	VisInpSTs            []int            `toml:"visible_input_subtasks"`
+	TestIDOverwrite      map[string]int   `toml:"test_id_overwrite,omitempty"`
 }
 
 type PTomlMetadata struct {
@@ -43,13 +44,14 @@ func (task *Task) encodeProblemTOML() ([]byte, error) {
 	testIDOverwrite := task.getTestIDByFilenameOverwriteMap()
 
 	t := ProblemTOML{
-		Specification:   proglvFSTaskFormatSpecVersOfScript,
-		TaskName:        task.taskName,
-		Metadata:        PTomlMetadata{ProblemTags: task.problemTags, DifficultyFrom1To5: task.difficultyOneToFive, TaskAuthors: task.problemAuthors, OriginOlympiad: task.originOlympiad},
-		Constraints:     PTomlConstraints{MemoryMegabytes: task.memoryMegabytes, CPUTimeSeconds: task.cpuTimeSeconds},
-		TestGroups:      []PTomlTestGroup{},
-		VisInpSTs:       task.visibleInputSubtasks,
-		TestIDOverwrite: testIDOverwrite,
+		Specification:        proglvFSTaskFormatSpecVersOfScript,
+		TaskName:             task.taskName,
+		Metadata:             PTomlMetadata{ProblemTags: task.problemTags, DifficultyFrom1To5: task.difficultyOneToFive, TaskAuthors: task.problemAuthors, OriginOlympiad: task.originOlympiad},
+		Constraints:          PTomlConstraints{MemoryMegabytes: task.memoryMegabytes, CPUTimeSeconds: task.cpuTimeSeconds},
+		TestGroups:           []PTomlTestGroup{},
+		IllustrationImgFname: task.illstrImgFname,
+		VisInpSTs:            task.visibleInputSubtasks,
+		TestIDOverwrite:      testIDOverwrite,
 	}
 	t.Specification = proglvFSTaskFormatSpecVersOfScript
 

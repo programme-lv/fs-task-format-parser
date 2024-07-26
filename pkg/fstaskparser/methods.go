@@ -325,3 +325,7 @@ func (t *Task) SetMarkdownStatements(statements []MarkdownStatement) {
 func (t *Task) GetTaskIllustrationImage() []byte {
 	return t.illustration
 }
+
+func (t *Task) GetAssets() []asset {
+	return t.assets
+}

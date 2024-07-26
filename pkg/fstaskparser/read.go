@@ -274,11 +274,49 @@ func Read(taskRootDirPath string) (*Task, error) {
 		log.Printf("Error reading task illustration: %v\n", err)
 	}
 
+	log.Println("Reading all assets")
+	t.assets, err = readAssets(taskRootDirPath)
+	if err != nil {
+		log.Printf("Error reading all assets: %v\n", err)
+	}
+
 	log.Println("Successfully read and parsed task")
 	return &t, nil
 }
 
+func readAssets(rootDirPath string) ([]asset, error) {
+	res := make([]asset, 0)
+	dirPath := filepath.Join(rootDirPath, "assets")
+	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
+		return res, nil
+	}
+
+	files, err := os.ReadDir(dirPath)
+	if err != nil {
+		return res, fmt.Errorf("error reading assets directory: %w", err)
+	}
+
+	for _, f := range files {
+		if f.IsDir() {
+			return nil, fmt.Errorf("directories are currently not supported")
+		}
+		bytes, err := os.ReadFile(filepath.Join(dirPath, f.Name()))
+		if err != nil {
+			return nil, fmt.Errorf("error reading asset: %w", err)
+		}
+		res = append(res, asset{
+			RelativePath: f.Name(),
+			Content:      bytes,
+		})
+	}
+
+	return res, nil
+}
+
 func readIllustration(illstrImgFname string, dirPath string) ([]byte, error) {
+	if illstrImgFname == "" {
+		return nil, nil
+	}
 	path := filepath.Join(dirPath, "assets", illstrImgFname)
 	bytes, err := os.ReadFile(path)
 	if err != nil {

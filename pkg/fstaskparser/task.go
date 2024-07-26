@@ -56,6 +56,13 @@ type Task struct {
 
 	illstrImgFname string
 	illustration   []byte
+
+	assets []asset
+}
+
+type asset struct {
+	RelativePath string
+	Content      []byte
 }
 
 type mDStatement struct {
@@ -88,16 +95,15 @@ type example struct {
 
 func NewTask(taskName string) (*Task, error) {
 	t := Task{
-		problemTomlContent:  []byte{},
-		problemTags:         []string{},
-		problemAuthors:      []string{},
-		taskName:            taskName,
-		originOlympiad:      "",
-		difficultyOneToFive: 0,
-		memoryMegabytes:     256,
-		cpuTimeSeconds:      1.0,
-		examples:            []example{},
-		// exampleFilenameToID:  map[string]int{},
+		problemTomlContent:   []byte{},
+		problemTags:          []string{},
+		problemAuthors:       []string{},
+		taskName:             taskName,
+		originOlympiad:       "",
+		difficultyOneToFive:  0,
+		memoryMegabytes:      256,
+		cpuTimeSeconds:       1.0,
+		examples:             []example{},
 		visibleInputSubtasks: []int{},
 		mdStatements:         []mDStatement{},
 		pdfStatements:        map[string][]byte{},
@@ -112,6 +118,8 @@ func NewTask(taskName string) (*Task, error) {
 		tGroupToStMap:        map[int]int{},
 		tGroupTestIDs:        map[int][]int{},
 		tGroupFnames:         map[int][]string{},
+		illstrImgFname:       "",
+		illustration:         []byte{},
 	}
 
 	return &t, nil
