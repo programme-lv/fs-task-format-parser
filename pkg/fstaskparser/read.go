@@ -42,7 +42,6 @@ func Read(taskRootDirPath string) (*Task, error) {
 		tGroupTestIDs:        map[int][]int{},
 		tGroupFnames:         map[int][]string{},
 		illstrImgFname:       "",
-		illustration:         []byte{},
 	}
 
 	problemTomlPath := filepath.Join(taskRootDirPath, "problem.toml")
@@ -268,12 +267,6 @@ func Read(taskRootDirPath string) (*Task, error) {
 		log.Printf("Error reading task illustration filename: %v\n", err)
 	}
 
-	log.Println("Reading task illustration")
-	t.illustration, err = readIllustration(t.illstrImgFname, taskRootDirPath)
-	if err != nil {
-		log.Printf("Error reading task illustration: %v\n", err)
-	}
-
 	log.Println("Reading all assets")
 	t.assets, err = readAssets(taskRootDirPath)
 	if err != nil {
@@ -311,19 +304,6 @@ func readAssets(rootDirPath string) ([]asset, error) {
 	}
 
 	return res, nil
-}
-
-func readIllustration(illstrImgFname string, dirPath string) ([]byte, error) {
-	if illstrImgFname == "" {
-		return nil, nil
-	}
-	path := filepath.Join(dirPath, "assets", illstrImgFname)
-	bytes, err := os.ReadFile(path)
-	if err != nil {
-		return nil, fmt.Errorf("error reading illustration: %w", err)
-	}
-
-	return bytes, nil
 }
 
 func readIllstrImgFnameFromPToml(pToml []byte) (string, error) {

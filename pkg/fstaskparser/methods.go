@@ -322,8 +322,22 @@ func (t *Task) SetMarkdownStatements(statements []MarkdownStatement) {
 	}
 }
 
-func (t *Task) GetTaskIllustrationImage() []byte {
-	return t.illustration
+type Asset struct {
+	RelativePath string // relative path from assets directory
+	Content      []byte
+}
+
+func (t *Task) GetTaskIllustrationImage() *Asset {
+	for _, asset := range t.assets {
+		if asset.RelativePath == t.illstrImgFname {
+			return &Asset{
+				RelativePath: asset.RelativePath,
+				Content:      asset.Content,
+			}
+		}
+	}
+
+	return nil
 }
 
 func (t *Task) GetAssets() []asset {

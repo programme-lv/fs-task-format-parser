@@ -55,7 +55,6 @@ type Task struct {
 	tGroupFnames   map[int][]string // used only during reading directory
 
 	illstrImgFname string
-	illustration   []byte
 
 	assets []asset
 }
@@ -119,7 +118,6 @@ func NewTask(taskName string) (*Task, error) {
 		tGroupTestIDs:        map[int][]int{},
 		tGroupFnames:         map[int][]string{},
 		illstrImgFname:       "",
-		illustration:         []byte{},
 	}
 
 	return &t, nil

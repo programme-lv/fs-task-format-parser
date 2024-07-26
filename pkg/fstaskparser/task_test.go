@@ -499,13 +499,19 @@ func TestReadingWritingIllustrationImage(t *testing.T) {
 
 	// read illustration image
 	imgPath := filepath.Join(testTaskPath, "assets", "illustration.png")
-	imgBytes, err := os.ReadFile(imgPath)
+	imgAsset2, err := os.ReadFile(imgPath)
 	require.NoErrorf(t, err, "failed to read illustration image: %v", err)
 
-	parsedImgBytes := parsedTask.GetTaskIllustrationImage()
-	require.NotNil(t, parsedImgBytes)
-	require.Equal(t, imgBytes, parsedImgBytes)
+	parsedImg := parsedTask.GetTaskIllustrationImage()
+	require.NotNil(t, parsedImg)
+	expectedImgAsset := &fstaskparser.Asset{
+		RelativePath: "illustration.png",
+		Content:      imgAsset2,
+	}
 	require.Equal(t, len(parsedTask.GetAssets()), 1)
+	require.Equal(t, expectedImgAsset.Content, parsedImg.Content)
+	require.Equal(t, expectedImgAsset.RelativePath, parsedImg.RelativePath)
+	require.Equal(t, expectedImgAsset, parsedImg)
 
 	tmpDirectory, err := os.MkdirTemp("", "fstaskparser-test-")
 	require.NoErrorf(t, err, "failed to create temporary directory: %v", err)
@@ -519,9 +525,9 @@ func TestReadingWritingIllustrationImage(t *testing.T) {
 
 	storedTask, err := fstaskparser.Read(outputDirectory)
 	require.NoErrorf(t, err, "failed to read task: %v", err)
-	parsedImgBytes2 := storedTask.GetTaskIllustrationImage()
-	require.NotNil(t, parsedImgBytes2)
-	require.Equal(t, imgBytes, parsedImgBytes2)
+	parsedImgAsset2 := storedTask.GetTaskIllustrationImage()
+	require.NotNil(t, parsedImgAsset2)
+	require.Equal(t, expectedImgAsset, parsedImgAsset2)
 }
 
 /*
