@@ -1,6 +1,7 @@
 specification = '2.2'
 task_name = 'Kvadrātveida putekļsūcējs'
 visible_input_subtasks = [1]
+illustration_image = 'illustration.png'
 
 [metadata]
   problem_tags = []

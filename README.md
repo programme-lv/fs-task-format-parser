@@ -1,5 +1,9 @@
 ## version history
 
+### version "v2.4.0"
+
+- added assets directory
+
 ### version "v2.3.0"
 
 - prefixed version by "v", migrated to semantic versioning 3 numbers
