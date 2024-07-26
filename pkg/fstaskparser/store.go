@@ -58,7 +58,36 @@ func (task *Task) Store(dirPath string) error {
 	}
 	log.Println("Markdown statements written successfully")
 
+	err = task.storeAssets(filepath.Join(dirPath, "assets"))
+	if err != nil {
+		log.Printf("Error storing assets: %v\n", err)
+		return fmt.Errorf("error storing assets: %w", err)
+	}
+	log.Println("assets written successfully")
+
 	log.Printf("Task successfully stored in directory: %s\n", dirPath)
+	return nil
+}
+
+func (task *Task) storeAssets(assetDir string) error {
+	err := os.MkdirAll(assetDir, 0755)
+	if err != nil {
+		log.Printf("Error creating assets directory: %v\n", err)
+		return fmt.Errorf("error creating assets directory: %w", err)
+	}
+	log.Println("Assets directory created successfully")
+
+	for _, v := range task.assets {
+		// v.Content
+		// v.RelativePath
+		path := filepath.Join(assetDir, v.RelativePath)
+		err = os.WriteFile(path, v.Content, 0644)
+		if err != nil {
+			log.Printf("Error writing asset: %v\n", err)
+			return fmt.Errorf("error writing asset: %w", err)
+		}
+		log.Printf("Asset written: %s\n", path)
+	}
 	return nil
 }
 
