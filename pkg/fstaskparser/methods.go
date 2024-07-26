@@ -321,3 +321,7 @@ func (t *Task) SetMarkdownStatements(statements []MarkdownStatement) {
 		t.mdStatements = append(t.mdStatements, mDStatement(statement))
 	}
 }
+
+func (t *Task) GetTaskIllustrationImage() []byte {
+	return t.illustration
+}

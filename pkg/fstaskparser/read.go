@@ -14,20 +14,19 @@ func init() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 }
 
-func Read(dirPath string) (*Task, error) {
-	log.Printf("Starting to read directory: %s\n", dirPath)
+func Read(taskRootDirPath string) (*Task, error) {
+	log.Printf("Starting to read directory: %s\n", taskRootDirPath)
 
 	t := Task{
-		problemTomlContent:  []byte{},
-		problemTags:         []string{},
-		problemAuthors:      []string{},
-		taskName:            "",
-		originOlympiad:      "",
-		difficultyOneToFive: 0,
-		memoryMegabytes:     0,
-		cpuTimeSeconds:      0,
-		examples:            []example{},
-		// exampleFilenameToID:  map[string]int{},
+		problemTomlContent:   []byte{},
+		problemTags:          []string{},
+		problemAuthors:       []string{},
+		taskName:             "",
+		originOlympiad:       "",
+		difficultyOneToFive:  0,
+		memoryMegabytes:      0,
+		cpuTimeSeconds:       0,
+		examples:             []example{},
 		visibleInputSubtasks: []int{},
 		mdStatements:         []mDStatement{},
 		pdfStatements:        map[string][]byte{},
@@ -42,9 +41,11 @@ func Read(dirPath string) (*Task, error) {
 		tGroupToStMap:        map[int]int{},
 		tGroupTestIDs:        map[int][]int{},
 		tGroupFnames:         map[int][]string{},
+		illstrImgFname:       "",
+		illustration:         []byte{},
 	}
 
-	problemTomlPath := filepath.Join(dirPath, "problem.toml")
+	problemTomlPath := filepath.Join(taskRootDirPath, "problem.toml")
 	log.Printf("Reading problem.toml from: %s\n", problemTomlPath)
 	problemTomlContent, err := os.ReadFile(problemTomlPath)
 	if err != nil {
@@ -134,7 +135,7 @@ func Read(dirPath string) (*Task, error) {
 	}
 
 	log.Println("Reading test filenames from the tests directory")
-	t.testFnamesSorted, err = readTestFNamesSorted(filepath.Join(dirPath, "tests"))
+	t.testFnamesSorted, err = readTestFNamesSorted(filepath.Join(taskRootDirPath, "tests"))
 	if err != nil {
 		log.Printf("Error reading test filenames: %v\n", err)
 		return nil, fmt.Errorf("error reading test filenames: %w", err)
@@ -176,14 +177,14 @@ func Read(dirPath string) (*Task, error) {
 	}
 
 	log.Println("Reading tests directory")
-	t.tests, err = readTestsDir(dirPath, t.testFilenameToID)
+	t.tests, err = readTestsDir(taskRootDirPath, t.testFilenameToID)
 	if err != nil {
 		log.Printf("Error reading tests directory: %v\n", err)
 		return nil, fmt.Errorf("error reading tests directory: %w", err)
 	}
 
 	log.Println("Reading examples directory")
-	t.examples, err = readExamplesDir(dirPath)
+	t.examples, err = readExamplesDir(taskRootDirPath)
 	if err != nil {
 		log.Printf("Error reading examples directory: %v\n", err)
 		return nil, fmt.Errorf("error reading examples directory: %w", err)
@@ -249,19 +250,58 @@ func Read(dirPath string) (*Task, error) {
 	}
 
 	log.Println("Reading PDF statements")
-	t.pdfStatements, err = readPDFStatements(specVers, dirPath)
+	t.pdfStatements, err = readPDFStatements(specVers, taskRootDirPath)
 	if err != nil {
 		log.Printf("Error reading PDF statements: %v\n", err)
 	}
 
 	log.Println("Reading MD statements")
-	t.mdStatements, err = readMDStatements(specVers, dirPath)
+	t.mdStatements, err = readMDStatements(specVers, taskRootDirPath)
 	if err != nil {
 		log.Printf("Error reading MD statements: %v\n", err)
 	}
 
+	// read task illustration
+	log.Println("Reading task illustration filename")
+	t.illstrImgFname, err = readIllstrImgFnameFromPToml(problemTomlContent)
+	if err != nil {
+		log.Printf("Error reading task illustration filename: %v\n", err)
+	}
+
+	log.Println("Reading task illustration")
+	t.illustration, err = readIllustration(t.illstrImgFname, taskRootDirPath)
+	if err != nil {
+		log.Printf("Error reading task illustration: %v\n", err)
+	}
+
 	log.Println("Successfully read and parsed task")
 	return &t, nil
+}
+
+func readIllustration(illstrImgFname string, dirPath string) ([]byte, error) {
+	path := filepath.Join(dirPath, "assets", illstrImgFname)
+	bytes, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("error reading illustration: %w", err)
+	}
+
+	return bytes, nil
+}
+
+func readIllstrImgFnameFromPToml(pToml []byte) (string, error) {
+	illustrationPath := ""
+	tomlStruct := struct {
+		IllstrImgFname string `toml:"illustration_image"`
+	}{}
+
+	err := toml.Unmarshal(pToml, &tomlStruct)
+	if err != nil {
+		log.Printf("Failed to unmarshal the task name: %v\n", err)
+		return "", fmt.Errorf("failed to unmarshal the task name: %w", err)
+	}
+
+	illustrationPath = tomlStruct.IllstrImgFname
+	return illustrationPath, nil
 }
 
 func readMDStatements(_ string, rootDirPath string) ([]mDStatement, error) {

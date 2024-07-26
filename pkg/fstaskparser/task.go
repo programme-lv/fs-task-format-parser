@@ -53,6 +53,9 @@ type Task struct {
 	tGroupToStMap  map[int]int
 	tGroupTestIDs  map[int][]int
 	tGroupFnames   map[int][]string // used only during reading directory
+
+	illstrImgFname string
+	illustration   []byte
 }
 
 type mDStatement struct {

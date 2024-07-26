@@ -493,12 +493,25 @@ func TestReadingWritingMDStatements(t *testing.T) {
 	}
 }
 
-/*
-kvadrputekl problem.toml
+func TestReadingWritingIllustrationImage(t *testing.T) {
+	parsedTask, err := fstaskparser.Read(testTaskPath)
+	require.NoErrorf(t, err, "failed to read task: %v", err)
 
+	// read illustration image
+	imgPath := filepath.Join(testTaskPath, "assets", "illustration.png")
+	imgBytes, err := os.ReadFile(imgPath)
+	require.NoErrorf(t, err, "failed to read illustration image: %v", err)
+
+	parsedImgBytes := parsedTask.GetTaskIllustrationImage()
+	require.NotNil(t, parsedImgBytes)
+	require.Equal(t, imgBytes, parsedImgBytes)
+}
+
+/*
 specification = '2.2'
 task_name = 'Kvadrātveida putekļsūcējs'
 visible_input_subtasks = [1]
+illustration_image = 'illustration.png'
 
 [metadata]
   problem_tags = []
@@ -526,13 +539,20 @@ visible_input_subtasks = [1]
 */
 
 /*
-/home/kp/Programming/PROGLV/fs-task-format-parser > tree ./testdata/kvadrputekl/
 ./testdata/kvadrputekl/
+├── assets
+│   └── illustration.png
 ├── examples
 │   ├── kp00.in
 │   └── kp00.out
 ├── problem.toml
 ├── statements
+│   ├── md
+│   │   └── lv
+│   │       ├── input.md
+│   │       ├── output.md
+│   │       ├── scoring.md
+│   │       └── story.md
 │   └── pdf
 │       └── lv.pdf
 └── tests
@@ -542,12 +562,5 @@ visible_input_subtasks = [1]
     ├── kp01b.out
     ├── kp01c.in
     ├── kp01c.out
-    ├── kp02a.in
-    ├── kp02a.out
-    ├── kp02b.in
-    ├── kp02b.out
-    ├── kp02c.in
-    └── kp02c.out
-
-5 directories, 16 files
+	...
 */
