@@ -3,6 +3,7 @@
 ### version "v2.4.0"
 
 - added assets directory
+- added origin notes dictionary to metadata
 
 ### version "v2.3.0"
 

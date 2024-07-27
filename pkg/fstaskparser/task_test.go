@@ -292,6 +292,9 @@ func TestReadingWritingMetadata(t *testing.T) {
 	assert.Equal(t, []string{"Author1", "Author2"}, parsedTask.GetTaskAuthors())
 	assert.Equal(t, "LIO", parsedTask.GetOriginOlympiad())
 	assert.Equal(t, 3, parsedTask.GetDifficultyOneToFive())
+	require.Equal(t, map[string]string{
+		"lv": "Uzdevums parādījās Latvijas 37. informātikas olimpiādes (2023./2024. gads) skolas kārtā.",
+	}, parsedTask.GetOriginNotes())
 
 	tmpDirectory, err := os.MkdirTemp("", "fstaskparser-test-")
 	require.NoErrorf(t, err, "failed to create temporary directory: %v", err)
@@ -312,6 +315,9 @@ func TestReadingWritingMetadata(t *testing.T) {
 	assert.Equal(t, []string{"Author1", "Author2"}, storedTask.GetTaskAuthors())
 	assert.Equal(t, "LIO", storedTask.GetOriginOlympiad())
 	assert.Equal(t, 3, storedTask.GetDifficultyOneToFive())
+	require.Equal(t, map[string]string{
+		"lv": "Uzdevums parādījās Latvijas 37. informātikas olimpiādes (2023./2024. gads) skolas kārtā.",
+	}, storedTask.GetOriginNotes())
 }
 
 func TestReadingWritingTestGroups(t *testing.T) {

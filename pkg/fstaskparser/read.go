@@ -42,6 +42,8 @@ func Read(taskRootDirPath string) (*Task, error) {
 		tGroupTestIDs:        map[int][]int{},
 		tGroupFnames:         map[int][]string{},
 		illstrImgFname:       "",
+		assets:               []asset{},
+		OriginNotes:          map[string]string{},
 	}
 
 	problemTomlPath := filepath.Join(taskRootDirPath, "problem.toml")
@@ -273,8 +275,32 @@ func Read(taskRootDirPath string) (*Task, error) {
 		log.Printf("Error reading all assets: %v\n", err)
 	}
 
+	log.Println("Reading origin notes")
+	t.OriginNotes, err = readOriginNotes(problemTomlContent)
+	if err != nil {
+		log.Printf("Error reading origin notes: %v\n", err)
+	}
+	log.Println("Reading task name")
+
 	log.Println("Successfully read and parsed task")
 	return &t, nil
+}
+
+func readOriginNotes(pToml []byte) (map[string]string, error) {
+	type Metadata struct {
+		OriginNotes map[string]string `toml:"origin_notes,omitempty"`
+	}
+	metadata := struct {
+		Metadata Metadata `toml:"metadata"`
+	}{}
+
+	err := toml.Unmarshal(pToml, &metadata)
+	if err != nil {
+		log.Printf("Failed to unmarshal the origin notes: %v\n", err)
+		return nil, fmt.Errorf("failed to unmarshal the origin notes: %w", err)
+	}
+
+	return metadata.Metadata.OriginNotes, nil
 }
 
 func readAssets(rootDirPath string) ([]asset, error) {

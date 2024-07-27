@@ -343,3 +343,7 @@ func (t *Task) GetTaskIllustrationImage() *Asset {
 func (t *Task) GetAssets() []asset {
 	return t.assets
 }
+
+func (t *Task) GetOriginNotes() map[string]string {
+	return t.OriginNotes
+}

@@ -8,7 +8,7 @@ import (
 	"sort"
 )
 
-const proglvFSTaskFormatSpecVersOfScript = "v2.3.0"
+const proglvFSTaskFormatSpecVersOfScript = "v2.4.0"
 
 func (task *Task) Store(dirPath string) error {
 	log.Printf("Starting to store task to directory: %s\n", dirPath)

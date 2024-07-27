@@ -19,10 +19,12 @@ type ProblemTOML struct {
 }
 
 type PTomlMetadata struct {
-	ProblemTags        []string `toml:"problem_tags"`
-	DifficultyFrom1To5 int      `toml:"difficulty_1_to_5"`
-	TaskAuthors        []string `toml:"task_authors"`
-	OriginOlympiad     string   `toml:"origin_olympiad"`
+	ProblemTags        []string          `toml:"problem_tags"`
+	DifficultyFrom1To5 int               `toml:"difficulty_1_to_5"`
+	TaskAuthors        []string          `toml:"task_authors"`
+	OriginOlympiad     string            `toml:"origin_olympiad"`
+	OriginNotes        map[string]string `toml:"origin_notes,omitempty"`
+	OriginInstitution  string            `toml:"origin_institution,omitempty"`
 }
 
 type PTomlConstraints struct {
@@ -44,9 +46,16 @@ func (task *Task) encodeProblemTOML() ([]byte, error) {
 	testIDOverwrite := task.getTestIDByFilenameOverwriteMap()
 
 	t := ProblemTOML{
-		Specification:        proglvFSTaskFormatSpecVersOfScript,
-		TaskName:             task.taskName,
-		Metadata:             PTomlMetadata{ProblemTags: task.problemTags, DifficultyFrom1To5: task.difficultyOneToFive, TaskAuthors: task.problemAuthors, OriginOlympiad: task.originOlympiad},
+		Specification: proglvFSTaskFormatSpecVersOfScript,
+		TaskName:      task.taskName,
+		Metadata: PTomlMetadata{
+			ProblemTags:        task.problemTags,
+			DifficultyFrom1To5: task.difficultyOneToFive,
+			TaskAuthors:        task.problemAuthors,
+			OriginOlympiad:     task.originOlympiad,
+			OriginNotes:        task.OriginNotes,
+			OriginInstitution:  task.OriginInstitution,
+		},
 		Constraints:          PTomlConstraints{MemoryMegabytes: task.memoryMegabytes, CPUTimeSeconds: task.cpuTimeSeconds},
 		TestGroups:           []PTomlTestGroup{},
 		IllustrationImgFname: task.illstrImgFname,

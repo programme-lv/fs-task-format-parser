@@ -57,6 +57,9 @@ type Task struct {
 	illstrImgFname string
 
 	assets []asset
+
+	OriginNotes       map[string]string
+	OriginInstitution string
 }
 
 type asset struct {
@@ -118,6 +121,9 @@ func NewTask(taskName string) (*Task, error) {
 		tGroupTestIDs:        map[int][]int{},
 		tGroupFnames:         map[int][]string{},
 		illstrImgFname:       "",
+		assets:               []asset{},
+		OriginNotes:          map[string]string{},
+		OriginInstitution:    "",
 	}
 
 	return &t, nil
