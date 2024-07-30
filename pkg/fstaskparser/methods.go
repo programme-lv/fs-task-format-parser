@@ -111,8 +111,24 @@ func (t *Task) AssignFilenameToTest(filename string, testID int) {
 	t.testFilenameToID[filename] = testID
 }
 
-func (t *Task) GetExamples() []example {
-	return t.examples
+type Example struct {
+	Input  []byte
+	Output []byte
+	MdNote []byte
+	FName  *string // original file base name for example
+}
+
+func (t *Task) GetExamples() []Example {
+	res := make([]Example, 0, len(t.examples))
+	for _, e := range t.examples {
+		res = append(res, Example{
+			Input:  e.Input,
+			Output: e.Output,
+			MdNote: e.MdNote,
+			FName:  e.Name,
+		})
+	}
+	return res
 }
 
 func (t *Task) AddExample(input []byte, output []byte) {

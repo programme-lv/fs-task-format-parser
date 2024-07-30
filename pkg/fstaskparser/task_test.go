@@ -182,24 +182,24 @@ func TestReadingWritingExamples(t *testing.T) {
 	require.NoErrorf(t, err, "failed to read task: %v", err)
 
 	parsedExamples := parsedTask.GetExamples()
-	require.Equal(t, 1, len(parsedExamples))
+	require.Equal(t, 2, len(parsedExamples))
 
 	parsedExampleNames := []string{}
-	for i := 0; i < 1; i++ {
-		parsedExampleNames = append(parsedExampleNames, *parsedExamples[i].Name)
+	for i := 0; i < 2; i++ {
+		parsedExampleNames = append(parsedExampleNames, *parsedExamples[i].FName)
 	}
-	expectedExampleNames := []string{"kp00"}
+	expectedExampleNames := []string{"kp00", "kp01"}
 	assert.Equal(t, expectedExampleNames, parsedExampleNames)
 
 	parsedInputs := []string{}
-	for i := 0; i < 1; i++ {
+	for i := 0; i < 2; i++ {
 		parsedInputs = append(parsedInputs, string(parsedExamples[i].Input))
 	}
 
 	examplePath := filepath.Join(testTaskPath, "examples")
 	expectedInputs := []string{}
-	for i := 0; i < 1; i++ {
-		inPath := filepath.Join(examplePath, fmt.Sprintf("%s.in", *parsedExamples[i].Name))
+	for i := 0; i < 2; i++ {
+		inPath := filepath.Join(examplePath, fmt.Sprintf("%s.in", *parsedExamples[i].FName))
 
 		in, err := os.ReadFile(inPath)
 		require.NoErrorf(t, err, "failed to read input file: %v", err)
@@ -209,12 +209,12 @@ func TestReadingWritingExamples(t *testing.T) {
 	assert.Equal(t, expectedInputs, parsedInputs)
 
 	parsedOutputs := []string{}
-	for i := 0; i < 1; i++ {
+	for i := 0; i < 2; i++ {
 		parsedOutputs = append(parsedOutputs, string(parsedExamples[i].Output))
 	}
 	expectedOutputs := []string{}
-	for i := 0; i < 1; i++ {
-		outPath := filepath.Join(examplePath, fmt.Sprintf("%s.out", *parsedExamples[i].Name))
+	for i := 0; i < 2; i++ {
+		outPath := filepath.Join(examplePath, fmt.Sprintf("%s.out", *parsedExamples[i].FName))
 
 		out, err := os.ReadFile(outPath)
 		require.NoErrorf(t, err, "failed to read output file: %v", err)
@@ -239,19 +239,19 @@ func TestReadingWritingExamples(t *testing.T) {
 	require.NoErrorf(t, err, "failed to read task: %v", err)
 
 	storedExampleNames := []string{}
-	for i := 0; i < 1; i++ {
-		storedExampleNames = append(storedExampleNames, *storedTask.GetExamples()[i].Name)
+	for i := 0; i < 2; i++ {
+		storedExampleNames = append(storedExampleNames, *storedTask.GetExamples()[i].FName)
 	}
 	assert.Equal(t, expectedExampleNames, storedExampleNames)
 
 	storedInputs := []string{}
-	for i := 0; i < 1; i++ {
+	for i := 0; i < 2; i++ {
 		storedInputs = append(storedInputs, string(storedTask.GetExamples()[i].Input))
 	}
 	assert.Equal(t, expectedInputs, storedInputs)
 
 	storedOutputs := []string{}
-	for i := 0; i < 1; i++ {
+	for i := 0; i < 2; i++ {
 		storedOutputs = append(storedOutputs, string(storedTask.GetExamples()[i].Output))
 	}
 	assert.Equal(t, expectedOutputs, storedOutputs)

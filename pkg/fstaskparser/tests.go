@@ -93,47 +93,80 @@ func readExamplesDir(srcDirPath string) ([]example, error) {
 		return entries[i].Name() < entries[j].Name()
 	})
 
-	examples := make([]example, 0, len(entries)/2)
+	groupedByBase := make(map[string][]os.DirEntry)
+	for _, entry := range entries {
+		base := strings.TrimSuffix(entry.Name(), filepath.Ext(entry.Name()))
+		groupedByBase[base] = append(groupedByBase[base], entry)
+	}
 
-	for i := 0; i < len(entries); i += 2 {
-		inPath := filepath.Join(dir, entries[i].Name())
-		ansPath := filepath.Join(dir, entries[i+1].Name())
+	keys := make([]string, 0, len(groupedByBase))
+	for k := range groupedByBase {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
 
-		inFilename := entries[i].Name()
-		ansFilename := entries[i+1].Name()
-
-		inFilenameBase := strings.TrimSuffix(inFilename, filepath.Ext(inFilename))
-		ansFilenameBase := strings.TrimSuffix(ansFilename, filepath.Ext(ansFilename))
-
-		if inFilenameBase != ansFilenameBase {
-			log.Printf("Input and answer file base names do not match: %s, %s\n", inFilenameBase, ansFilenameBase)
-			return nil, fmt.Errorf("input and answer file base names do not match: %s, %s", inFilenameBase, ansFilenameBase)
+	examples := make([]example, len(groupedByBase))
+	i := 0
+	for _, key := range keys {
+		baseName := key
+		files := groupedByBase[key]
+		e := example{
+			Input:  []byte{},
+			Output: []byte{},
+			MdNote: []byte{},
+			Name:   &baseName,
 		}
 
-		// sometimes the test answer is stored as .out, sometimes as .ans
-		if strings.Contains(inFilename, ".ans") || strings.Contains(ansFilename, ".in") {
-			// swap the file paths
-			inPath, ansPath = ansPath, inPath
+		// check if .in exists, if not throw error
+		foundIn := false
+		for _, entry := range files {
+			if strings.Contains(entry.Name(), ".in") {
+				e.Input, err = os.ReadFile(filepath.Join(dir, entry.Name()))
+				if err != nil {
+					log.Printf("Error reading input file: %v\n", err)
+					return nil, fmt.Errorf("error reading input file: %w", err)
+				}
+				foundIn = true
+				break
+			}
+		}
+		if !foundIn {
+			log.Printf("Input file does not exist for example: %s\n", baseName)
+			return nil, fmt.Errorf("input file does not exist for example: %s", baseName)
 		}
 
-		input, err := os.ReadFile(inPath)
-		if err != nil {
-			log.Printf("Error reading input file: %v\n", err)
-			return nil, fmt.Errorf("error reading input file: %w", err)
+		// check if .out or .ans exists, if not throw error
+		foundOut := false
+		for _, entry := range files {
+			if strings.Contains(entry.Name(), ".out") || strings.Contains(entry.Name(), ".ans") {
+				e.Output, err = os.ReadFile(filepath.Join(dir, entry.Name()))
+				if err != nil {
+					log.Printf("Error reading output file: %v\n", err)
+					return nil, fmt.Errorf("error reading output file: %w", err)
+				}
+				foundOut = true
+				break
+			}
+		}
+		if !foundOut {
+			log.Printf("Output file does not exist for example: %s\n", baseName)
+			return nil, fmt.Errorf("output file does not exist for example: %s", baseName)
 		}
 
-		answer, err := os.ReadFile(ansPath)
-		if err != nil {
-			log.Printf("Error reading answer file: %v\n", err)
-			return nil, fmt.Errorf("error reading answer file: %w", err)
+		// check if .md exists, it is optional
+		for _, entry := range files {
+			if strings.Contains(entry.Name(), ".md") {
+				e.MdNote, err = os.ReadFile(filepath.Join(dir, entry.Name()))
+				if err != nil {
+					log.Printf("Error reading md file: %v\n", err)
+					return nil, fmt.Errorf("error reading md file: %w", err)
+				}
+				break
+			}
 		}
 
-		examples = append(examples, example{
-			// ID:     (i / 2) + 1,
-			Input:  input,
-			Output: answer,
-			Name:   &inFilenameBase,
-		})
+		examples[i] = e
+		i += 1
 	}
 
 	log.Printf("Successfully read examples")

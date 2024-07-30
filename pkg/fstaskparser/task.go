@@ -92,6 +92,7 @@ type example struct {
 	// ID     int
 	Input  []byte
 	Output []byte
+	MdNote []byte
 	Name   *string
 }
 
