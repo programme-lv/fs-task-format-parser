@@ -283,15 +283,19 @@ func (task *Task) storeExamples(examplesDirPath string) error {
 	for i, e := range task.examples {
 		var inPath string
 		var ansPath string
+		var mdPath string
 
 		if e.Name != nil {
 			inPath = filepath.Join(examplesDirPath, *e.Name+".in")
 			ansPath = filepath.Join(examplesDirPath, *e.Name+".out")
+			mdPath = filepath.Join(examplesDirPath, *e.Name+".md")
 		} else {
 			inName := fmt.Sprintf("%03d.in", i+1)
 			ansName := fmt.Sprintf("%03d.out", i+1)
+			mdName := fmt.Sprintf("%03d.md", i+1)
 			inPath = filepath.Join(examplesDirPath, inName)
 			ansPath = filepath.Join(examplesDirPath, ansName)
+			mdPath = filepath.Join(examplesDirPath, mdName)
 		}
 
 		err = os.WriteFile(inPath, e.Input, 0644)
@@ -304,6 +308,14 @@ func (task *Task) storeExamples(examplesDirPath string) error {
 		if err != nil {
 			log.Printf("Error writing answer file %s: %v\n", ansPath, err)
 			return fmt.Errorf("error writing answer file: %w", err)
+		}
+
+		if e.MdNote != nil && len(e.MdNote) > 0 {
+			err = os.WriteFile(mdPath, e.MdNote, 0644)
+			if err != nil {
+				log.Printf("Error writing Markdown note file %s: %v\n", mdPath, err)
+				return fmt.Errorf("error writing Markdown note file: %w", err)
+			}
 		}
 	}
 	log.Println("Example files written successfully")

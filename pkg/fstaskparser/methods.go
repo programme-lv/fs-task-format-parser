@@ -131,11 +131,11 @@ func (t *Task) GetExamples() []Example {
 	return res
 }
 
-func (t *Task) AddExample(input []byte, output []byte) {
+func (t *Task) AddExample(input []byte, output []byte, mdNote []byte) {
 	t.examples = append(t.examples, example{
-		// ID:     0,
 		Input:  input,
 		Output: output,
+		MdNote: mdNote,
 		Name:   nil,
 	})
 }

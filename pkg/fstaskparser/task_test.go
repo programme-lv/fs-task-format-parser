@@ -277,12 +277,16 @@ func TestReadingWritingExamples(t *testing.T) {
 	}
 	assert.Equal(t, expectedOutputs, storedOutputs)
 
+	require.Equal(t, 2, len(storedTask.GetExamples()))
+	require.Equal(t, expectedNotes[0], string(storedTask.GetExamples()[0].MdNote))
+	require.Equal(t, expectedNotes[1], string(storedTask.GetExamples()[1].MdNote))
+
 	createdTask, err := fstaskparser.NewTask(storedTask.GetTaskName())
 	if err != nil {
 		t.Errorf("failed to create task: %v", err)
 	}
 
-	createdTask.AddExample([]byte(storedInputs[0]), []byte(storedOutputs[0]))
+	createdTask.AddExample([]byte(storedInputs[0]), []byte(storedOutputs[0]), []byte(expectedNotes[0]))
 
 	// store created task
 	outputDirectory2 := filepath.Join(tmpDirectory, "kvadrputekl2")
