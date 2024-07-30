@@ -185,20 +185,20 @@ func TestReadingWritingExamples(t *testing.T) {
 	require.Equal(t, 2, len(parsedExamples))
 
 	parsedExampleNames := []string{}
-	for i := 0; i < 2; i++ {
+	for i := 0; i < len(parsedExamples); i++ {
 		parsedExampleNames = append(parsedExampleNames, *parsedExamples[i].FName)
 	}
 	expectedExampleNames := []string{"kp00", "kp01"}
 	assert.Equal(t, expectedExampleNames, parsedExampleNames)
 
 	parsedInputs := []string{}
-	for i := 0; i < 2; i++ {
+	for i := 0; i < len(parsedExamples); i++ {
 		parsedInputs = append(parsedInputs, string(parsedExamples[i].Input))
 	}
 
 	examplePath := filepath.Join(testTaskPath, "examples")
 	expectedInputs := []string{}
-	for i := 0; i < 2; i++ {
+	for i := 0; i < len(parsedExamples); i++ {
 		inPath := filepath.Join(examplePath, fmt.Sprintf("%s.in", *parsedExamples[i].FName))
 
 		in, err := os.ReadFile(inPath)
@@ -209,20 +209,41 @@ func TestReadingWritingExamples(t *testing.T) {
 	assert.Equal(t, expectedInputs, parsedInputs)
 
 	parsedOutputs := []string{}
-	for i := 0; i < 2; i++ {
+	for i := 0; i < len(parsedExamples); i++ {
 		parsedOutputs = append(parsedOutputs, string(parsedExamples[i].Output))
 	}
 	expectedOutputs := []string{}
-	for i := 0; i < 2; i++ {
+	for i := 0; i < len(parsedExamples); i++ {
 		outPath := filepath.Join(examplePath, fmt.Sprintf("%s.out", *parsedExamples[i].FName))
 
 		out, err := os.ReadFile(outPath)
 		require.NoErrorf(t, err, "failed to read output file: %v", err)
 
-		expectedOutputs = append(expectedOutputs, string(out))
+		outStr := string(out)
+		expectedOutputs = append(expectedOutputs, outStr)
 	}
-
 	assert.Equal(t, expectedOutputs, parsedOutputs)
+
+	parsedNotes := []string{}
+	for i := 0; i < len(parsedExamples); i++ {
+		mdNoteStr := string(parsedExamples[i].MdNote)
+		parsedNotes = append(parsedNotes, mdNoteStr)
+	}
+	expectedNotes := []string{}
+	for i := 0; i < len(parsedExamples); i++ {
+		if parsedExamples[i].MdNote == nil || len(parsedExamples[i].MdNote) == 0 {
+			expectedNotes = append(expectedNotes, "")
+			continue
+		}
+		notePath := filepath.Join(examplePath, fmt.Sprintf("%s.md", *parsedExamples[i].FName))
+
+		note, err := os.ReadFile(notePath)
+		require.NoErrorf(t, err, "failed to read note file: %v", err)
+
+		outStr := string(note)
+		expectedNotes = append(expectedNotes, outStr)
+	}
+	require.Equal(t, expectedNotes, parsedNotes)
 
 	tmpDirectory, err := os.MkdirTemp("", "fstaskparser-test-")
 	require.NoErrorf(t, err, "failed to create temporary directory: %v", err)
