@@ -282,8 +282,29 @@ func Read(taskRootDirPath string) (*Task, error) {
 	}
 	log.Println("Reading task name")
 
+	log.Println("Reading visible input subtasks")
+	t.visibleInputSubtasks, err = readVisibleInputSubtasks(specVers, problemTomlContent)
+	if err != nil {
+		log.Printf("Error reading visible input subtasks: %v\n", err)
+	}
+	log.Println("Successfully read visible input subtasks")
+
 	log.Println("Successfully read and parsed task")
 	return &t, nil
+}
+
+func readVisibleInputSubtasks(_ string, pToml []byte) ([]int, error) {
+	metadata := struct {
+		VisInpSTs []int `toml:"visible_input_subtasks"`
+	}{}
+
+	err := toml.Unmarshal(pToml, &metadata)
+	if err != nil {
+		log.Printf("Failed to unmarshal the visible input subtasks: %v\n", err)
+		return nil, fmt.Errorf("failed to unmarshal the visible input subtasks: %w", err)
+	}
+
+	return metadata.VisInpSTs, nil
 }
 
 func readOriginNotes(pToml []byte) (map[string]string, error) {
